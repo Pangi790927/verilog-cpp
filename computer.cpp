@@ -1,14 +1,15 @@
 #include <iostream>
+#include <verilated.h>
 #include "obj_dir/Vcpu.h"
-#include "verilated.h"
 
 int main(int argc, char const *argv[])
 {
 	Vcpu cpu;
 	cpu.A = 0;
+	cpu.B = 0;
 	cpu.eval();
 
-	std::cout << cpu.B << std::endl;
+	std::cout << (int)cpu.B << std::endl;
 	
 	return 0;
 }
