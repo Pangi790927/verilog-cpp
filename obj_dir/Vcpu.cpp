@@ -17,8 +17,9 @@ VL_CTOR_IMP(Vcpu) {
     // Reset internal values
     
     // Reset structure values
-    A = VL_RAND_RESET_I(1);
-    B = VL_RAND_RESET_I(1);
+    A = VL_RAND_RESET_I(32);
+    B = VL_RAND_RESET_I(32);
+    v__DOT__state = VL_RAND_RESET_I(32);
 }
 
 void Vcpu::__Vconfigure(Vcpu__Syms* vlSymsp, bool first) {
@@ -72,7 +73,9 @@ VL_INLINE_OPT void Vcpu::_combo__TOP__1(Vcpu__Syms* __restrict vlSymsp) {
     VL_DEBUG_IF(VL_PRINTF("    Vcpu::_combo__TOP__1\n"); );
     Vcpu* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
     // Body
-    vlTOPp->B = (1U & (~ (IData)(vlTOPp->A)));
+    // ALWAYS at cpu.v:8
+    vlTOPp->v__DOT__state = (~ vlTOPp->A);
+    vlTOPp->B = vlTOPp->v__DOT__state;
 }
 
 void Vcpu::_eval(Vcpu__Syms* __restrict vlSymsp) {

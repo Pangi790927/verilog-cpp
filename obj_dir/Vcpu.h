@@ -22,12 +22,12 @@ VL_MODULE(Vcpu) {
     // PORTS
     // The application code writes and reads these signals to
     // propagate new values into/out from the Verilated model.
-    VL_IN8(A,0,0);
-    VL_OUT8(B,0,0);
-    //char	__VpadToAlign2[2];
+    VL_IN(A,31,0);
+    VL_OUT(B,31,0);
     
     // LOCAL SIGNALS
     // Internals; generally not touched by application code
+    VL_SIG(v__DOT__state,31,0);
     
     // LOCAL VARIABLES
     // Internals; generally not touched by application code

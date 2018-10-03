@@ -1,11 +1,13 @@
 module cpu(
-		A,
-		B
+		input		[31:0] A,
+		output	reg [31:0] B
 	);
-   
-   input  A;
-   output B;
+	
+	reg [31:0] state;
 
-   not(B, A);
+	always @(*) begin
+		state = ~A;
+		B = state;
+	end
 
 endmodule
