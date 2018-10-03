@@ -4,7 +4,7 @@
 
 int main(int argc, char const *argv[])
 {
-	Vcpu cpu;
+	Vcpu cpu("cpu");
 	cpu.A = 0;
 	cpu.B = 0;
 	cpu.eval();
