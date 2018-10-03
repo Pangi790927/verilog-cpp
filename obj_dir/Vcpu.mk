@@ -4,7 +4,7 @@
 # Execute this makefile from the object directory:
 #    make -f Vcpu.mk
 
-default: Vcpu
+default: Vcpu__ALL.a
 
 ### Constants...
 # Perl executable (from $PERL)
@@ -45,11 +45,9 @@ VM_USER_LDLIBS = \
 
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
-	computer \
 
 # User .cpp directories (from .cpp's on Verilator command line)
 VM_USER_DIR = \
-	. \
 
 
 ### Default rules...
@@ -57,16 +55,5 @@ VM_USER_DIR = \
 include Vcpu_classes.mk
 # Include global rules
 include $(VERILATOR_ROOT)/include/verilated.mk
-
-### Executable rules... (from --exe)
-VPATH += $(VM_USER_DIR)
-
-computer.o: computer.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
-
-### Link rules... (from --exe)
-Vcpu: $(VK_USER_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a
-	$(LINK) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@ $(LIBS) $(SC_LIBS) 2>&1 | c++filt
-
 
 # Verilated -*- Makefile -*-
