@@ -17,9 +17,15 @@ VL_CTOR_IMP(Vcpu) {
     // Reset internal values
     
     // Reset structure values
-    A = VL_RAND_RESET_I(32);
-    B = VL_RAND_RESET_I(32);
-    v__DOT__state = VL_RAND_RESET_I(32);
+    clk = VL_RAND_RESET_I(1);
+    rst = VL_RAND_RESET_I(1);
+    ioaddr = VL_RAND_RESET_I(16);
+    iodata = VL_RAND_RESET_I(16);
+    addr = VL_RAND_RESET_I(32);
+    data = VL_RAND_RESET_I(32);
+    ctrl = VL_RAND_RESET_I(16);
+    __Vclklast__TOP__clk = VL_RAND_RESET_I(1);
+    __Vclklast__TOP__rst = VL_RAND_RESET_I(1);
 }
 
 void Vcpu::__Vconfigure(Vcpu__Syms* vlSymsp, bool first) {
@@ -69,20 +75,32 @@ void Vcpu::_eval_initial_loop(Vcpu__Syms* __restrict vlSymsp) {
 //--------------------
 // Internal Methods
 
-VL_INLINE_OPT void Vcpu::_combo__TOP__1(Vcpu__Syms* __restrict vlSymsp) {
-    VL_DEBUG_IF(VL_PRINTF("    Vcpu::_combo__TOP__1\n"); );
+VL_INLINE_OPT void Vcpu::_sequent__TOP__1(Vcpu__Syms* __restrict vlSymsp) {
+    VL_DEBUG_IF(VL_PRINTF("    Vcpu::_sequent__TOP__1\n"); );
     Vcpu* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
     // Body
-    // ALWAYS at cpu.v:8
-    vlTOPp->v__DOT__state = (~ vlTOPp->A);
-    vlTOPp->B = vlTOPp->v__DOT__state;
+    // ALWAYS at cpu.v:25
+    if ((1U & (~ (IData)(vlTOPp->rst)))) {
+	if (vlTOPp->clk) {
+	    vlTOPp->addr = ((IData)(1U) + vlTOPp->addr);
+	    if ((1U & (~ (IData)(vlTOPp->ctrl)))) {
+		vlTOPp->ctrl = (1U | (IData)(vlTOPp->ctrl));
+	    }
+	}
+    }
 }
 
 void Vcpu::_eval(Vcpu__Syms* __restrict vlSymsp) {
     VL_DEBUG_IF(VL_PRINTF("    Vcpu::_eval\n"); );
     Vcpu* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
     // Body
-    vlTOPp->_combo__TOP__1(vlSymsp);
+    if ((((IData)(vlTOPp->clk) & (~ (IData)(vlTOPp->__Vclklast__TOP__clk))) 
+	 | ((IData)(vlTOPp->rst) & (~ (IData)(vlTOPp->__Vclklast__TOP__rst))))) {
+	vlTOPp->_sequent__TOP__1(vlSymsp);
+    }
+    // Final
+    vlTOPp->__Vclklast__TOP__clk = vlTOPp->clk;
+    vlTOPp->__Vclklast__TOP__rst = vlTOPp->rst;
 }
 
 void Vcpu::_eval_initial(Vcpu__Syms* __restrict vlSymsp) {
@@ -100,8 +118,6 @@ void Vcpu::final() {
 void Vcpu::_eval_settle(Vcpu__Syms* __restrict vlSymsp) {
     VL_DEBUG_IF(VL_PRINTF("    Vcpu::_eval_settle\n"); );
     Vcpu* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    // Body
-    vlTOPp->_combo__TOP__1(vlSymsp);
 }
 
 VL_INLINE_OPT QData Vcpu::_change_request(Vcpu__Syms* __restrict vlSymsp) {
