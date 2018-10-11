@@ -12,7 +12,6 @@
 	if (typeid(a) != typeid(b))										\
 		std::cout << "type mismatch in update rule" << std::endl;	\
 	update_changed(a, b, old);										\
-	old = a;														\
 }
 
 struct Mobo {
@@ -40,6 +39,7 @@ struct Mobo {
 		}
 		else if (original != b)
 			a = b;
+		original = a;
 	}
 
 	void insertCpu (const CPU& cpu) {

@@ -1,0 +1,59 @@
+#! /usr/bin/vvp
+:ivl_version "0.9.7 " "(v0_9_7)";
+:vpi_time_precision + 0;
+:vpi_module "system";
+:vpi_module "v2005_math";
+:vpi_module "va_math";
+S_0x18ef960 .scope module, "mux4" "mux4" 2 10;
+ .timescale 0 0;
+L_0x1923b30 .functor AND 1, L_0x1923160, L_0x1923a90, C4<1>, C4<1>;
+L_0x1923d10 .functor AND 1, L_0x1923760, L_0x1923be0, C4<1>, C4<1>;
+L_0x1923d70 .functor OR 1, L_0x1923b30, L_0x1923d10, C4<0>, C4<0>;
+v0x1922780_0 .net *"_s10", 0 0, L_0x1923b30; 1 drivers
+v0x1922840_0 .net *"_s13", 0 0, L_0x1923be0; 1 drivers
+v0x19228e0_0 .net *"_s14", 0 0, L_0x1923d10; 1 drivers
+v0x1922980_0 .net *"_s9", 0 0, L_0x1923a90; 1 drivers
+v0x1922a00_0 .net "a", 0 0, L_0x1923160; 1 drivers
+v0x1922ab0_0 .net "b", 0 0, L_0x1923760; 1 drivers
+v0x1922b70_0 .net "in", 4 0, C4<zzzzz>; 0 drivers
+v0x1922bf0_0 .net "out", 0 0, L_0x1923d70; 1 drivers
+v0x1922cc0_0 .net "selector", 2 0, C4<zzz>; 0 drivers
+L_0x19232b0 .part C4<zzzzz>, 0, 2;
+L_0x1923350 .part C4<zzz>, 0, 1;
+L_0x19238b0 .part C4<zzzzz>, 2, 2;
+L_0x19239a0 .part C4<zzz>, 0, 1;
+L_0x1923a90 .part C4<zzz>, 1, 1;
+L_0x1923be0 .part C4<zzz>, 1, 1;
+S_0x19221f0 .scope module, "ma" "mux2" 2 18, 2 1, S_0x18ef960;
+ .timescale 0 0;
+L_0x1922e60 .functor AND 1, L_0x1922d60, L_0x1923350, C4<1>, C4<1>;
+L_0x1923060 .functor AND 1, L_0x1922f40, L_0x1923350, C4<1>, C4<1>;
+L_0x1923160 .functor OR 1, L_0x1922e60, L_0x1923060, C4<0>, C4<0>;
+v0x19222e0_0 .net *"_s1", 0 0, L_0x1922d60; 1 drivers
+v0x19223a0_0 .net *"_s2", 0 0, L_0x1922e60; 1 drivers
+v0x1922440_0 .net *"_s5", 0 0, L_0x1922f40; 1 drivers
+v0x19224e0_0 .net *"_s6", 0 0, L_0x1923060; 1 drivers
+v0x1922560_0 .net "in", 1 0, L_0x19232b0; 1 drivers
+v0x1922600_0 .alias "out", 0 0, v0x1922a00_0;
+v0x19226e0_0 .net "selector", 0 0, L_0x1923350; 1 drivers
+L_0x1922d60 .part L_0x19232b0, 0, 1;
+L_0x1922f40 .part L_0x19232b0, 1, 1;
+S_0x18ee5f0 .scope module, "mb" "mux2" 2 19, 2 1, S_0x18ef960;
+ .timescale 0 0;
+L_0x1923490 .functor AND 1, L_0x19233f0, L_0x19239a0, C4<1>, C4<1>;
+L_0x1923660 .functor AND 1, L_0x1923540, L_0x19239a0, C4<1>, C4<1>;
+L_0x1923760 .functor OR 1, L_0x1923490, L_0x1923660, C4<0>, C4<0>;
+v0x18efc50_0 .net *"_s1", 0 0, L_0x19233f0; 1 drivers
+v0x1921de0_0 .net *"_s2", 0 0, L_0x1923490; 1 drivers
+v0x1921e80_0 .net *"_s5", 0 0, L_0x1923540; 1 drivers
+v0x1921f20_0 .net *"_s6", 0 0, L_0x1923660; 1 drivers
+v0x1921fd0_0 .net "in", 1 0, L_0x19238b0; 1 drivers
+v0x1922070_0 .alias "out", 0 0, v0x1922ab0_0;
+v0x1922150_0 .net "selector", 0 0, L_0x19239a0; 1 drivers
+L_0x19233f0 .part L_0x19238b0, 0, 1;
+L_0x1923540 .part L_0x19238b0, 1, 1;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "mux.v";
