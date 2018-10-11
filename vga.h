@@ -43,14 +43,14 @@ struct VGA {
 	size_t size = width * height;
 	std::shared_ptr<int[]> vmem = std::shared_ptr<int[]>(new int[size]);
 	std::function<void(int, int, uint)> putpixel;
-	std::function<void(void)> swapBuffers;
+	std::function<void(void)> show;
 	std::function<void(void)> focus;
 
 	VGA() {}
 	VGA (const std::function<void(int, int, uint)>& putpixel,
-			const std::function<void(void)>& swapBuffers,
+			const std::function<void(void)>& show,
 			const std::function<void(void)>& focus)
-	: putpixel(putpixel), swapBuffers(swapBuffers), focus(focus) {}
+	: putpixel(putpixel), show(show), focus(focus) {}
 
 	void update (bool clk) {
 		chip->clk = clk;
@@ -71,7 +71,7 @@ struct VGA {
 					for (int j = 0; j < width; j++)
 						putpixel(j, i, vmem[i * width + j]);
 
-			swapBuffers();
+			show();
 			chip->ctrl &= ~DISPLAY_NOW;
 		}
 		if (chip->ctrl & CLEAR_BIT) {
@@ -80,7 +80,7 @@ struct VGA {
 			for (int i = 0; i < height; i++)
 				for (int j = 0; j < width; j++)
 					putpixel(j, i, vmem[i * width + j]);
-			swapBuffers();
+			show();
 			chip->ctrl &= ~CLEAR_BIT;
 		}
 		/* end vga specific */

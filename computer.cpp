@@ -126,11 +126,12 @@ int main(int argc, char const *argv[]) {
 		vga.vmem[5] = 0x0000'0700 + 2;
 		vga.vmem[6] = 0x0000'0800 + 0;
 		vga.vmem[86] = 0x0000'0900 + 1;
+		
 		vga.focus();
 		vga.display_text();
-		vga.swapBuffers();
+		vga.show();
 		std::cout << "this" << std::endl;
-		// mobo.update();
+		mobo.update();
 	}
 
 	// if (th.joinable())
