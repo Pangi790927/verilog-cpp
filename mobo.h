@@ -36,8 +36,23 @@ struct Mobo {
 		if (original != a) {
 			if (original != b)
 				std::cout << "both changed, not good" << std::endl;
-			else
+			else {
 				b = a;
+
+				std::cout << "Printing bits of a: ";
+				for (uint i = 0; i < 8 * sizeof(Type); ++i) {
+					bool cba = (a & (1 << i));
+					bool cbb = (b & (1 << i));
+					bool cbo = (original & (1 << i));
+
+					if (cba == 0 && cba != cbb) {
+
+					} else if (cba != cbb) {
+
+					}
+					std::cout << (a & (1 << i)) << " ";
+				}
+			}
 		}
 		else if (original != b)
 			a = b;
