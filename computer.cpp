@@ -129,8 +129,7 @@ int main(int argc, char const *argv[]) {
 		vga.focus();
 		vga.display_text();
 		vga.swapBuffers();
-		std::cout << "this" << std::endl;
-		// mobo.update();
+		mobo.update();
 	}
 
 	// if (th.joinable())

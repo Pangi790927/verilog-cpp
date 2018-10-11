@@ -11,21 +11,10 @@ namespace fonts {
 	 * @param fp
 	 * @return
 	 */
-	bitmap_header *readBitmapHeader(FILE *fp) {
+	void *readBitmapHeader(std::fstream &fh, bitmap_header &hp) {
 	    //variable dec:
-	    size_t n;
-
 	    //Citire header bitmap
-	    bitmap_header *hp = (bitmap_header *) malloc(sizeof(bitmap_header));
-	    check(hp);
-
-	    n = fread(hp, sizeof(bitmap_header), 1, fp);
-	    if (n < 1) {
-	        free(hp);
-	        exit(-1);
-	    }
-
-	    return hp;
+  		fh.read((char*)&hp, sizeof(bitmap_header));
 	}
 
 	/**
@@ -34,40 +23,50 @@ namespace fonts {
 	 * @param hp
 	 * @return
 	 */
-	bmp_data *readBitmapData(FILE *fp, bitmap_header *hp) {
-	    bmp_data *bmp = (bmp_data *) malloc(sizeof(bmp_data));
+	void readBitmapData(std::fstream &fh, bitmap_header &hp, bmp_data &bmp) {
+	    bmp.originalLineSize = hp.width * 3;
+	    bmp.workLineSize = bmp.originalLineSize + 4 - bmp.originalLineSize % 4;
+	    bmp.padding = bmp.workLineSize - bmp.originalLineSize;
 
-	    bmp->originalLineSize = hp->width * 3;
-	    bmp->workLineSize = bmp->originalLineSize + 4 - bmp->originalLineSize % 4;
-	    bmp->padding = bmp->workLineSize - bmp->originalLineSize;
-
-	    if (bmp->padding == 4) {
-	        bmp->workLineSize = bmp->originalLineSize; //in cazul in care nu trebuie sa mai adaugam padding
-	        bmp->padding = 0;
+	    if (bmp.padding == 4) {
+	        bmp.workLineSize = bmp.originalLineSize; //in cazul in care nu trebuie sa mai adaugam padding
+	        bmp.padding = 0;
 	    }
-	    printf("Padding: %d\n", bmp->padding);
+	    std::cout<<"Padding:"<<bmp.padding<<std::endl;
 
 
-	    bmp->size = (size_t) (hp->height * bmp->workLineSize);
+	    bmp.size = (size_t) (hp.height * bmp.workLineSize);
 
 	    //Alocare buffer pentru citire si vectorul cu biti unde va fi plasata imaginea completa
-	    bmp->data = (char *) malloc(sizeof(char) * (bmp->size));
-	    check(bmp->data);
+	    bmp.data = new char[bmp.size];
 
-	    fseek(fp, sizeof(char) * hp->fileheader.dataoffset, SEEK_SET);
-	    printf("Offset: %d\n", hp->fileheader.dataoffset);
+	    fh.seekg(sizeof(char) * hp.fileheader.dataoffset, ios_base::beg);
 
+	    //fseek(fp, sizeof(char) * hp.fileheader.dataoffset, SEEK_SET);
+	    std::cout<<"Offset: " << hp.fileheader.dataoffset << std::endl;
 
-	    size_t n = fread(bmp->data, sizeof(char), bmp->size, fp);
-	    if (n < 1) {
-	        exit(-1);
+	    std::cout<<"Size: " << bmp.size << std::endl;
+
+	    //size_t n = fread(bmp.data, sizeof(char), bmp.size, fp);
+	    fh.read(bmp.data, bmp.size);
+
+	    for (int i = 0; i < bmp.size; ++i) {
+	    	std::cout << (int) bmp.data[i];
 	    }
-
-	    return bmp;
 	}
 
 	void test() {
 		std::cout << "sal" << std::endl;
+		std::fstream fbitmap;
+		fbitmap.open("fonts/font.bmp" , std::fstream::in | std::fstream::binary);
+
+		bitmap_header header;
+		bmp_data bmp;
+
+		readBitmapHeader(fbitmap, header);
+		std::cout << "W: " << header.width << "H: " << header.height << std::endl;
+
+		readBitmapData(fbitmap, header, bmp);
 	}
 }
 
