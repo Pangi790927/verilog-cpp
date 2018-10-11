@@ -1,1 +1,0 @@
-obj_dir/Vbridge.cpp obj_dir/Vbridge.h obj_dir/Vbridge.mk obj_dir/Vbridge__Syms.cpp obj_dir/Vbridge__Syms.h obj_dir/Vbridge__ver.d obj_dir/Vbridge_classes.mk  : /usr/bin/verilator_bin   /usr/bin/verilator_bin bridge.v 
