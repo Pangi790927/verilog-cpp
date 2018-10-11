@@ -63,27 +63,35 @@ int main(int argc, char const *argv[]) {
 	float window_scale = 1.5;
 	OpenglWindow display(640 * window_scale, 350 * window_scale, "VGA Display");
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, display.width / window_scale, 0,
-			display.height / window_scale, 1, -1); 
-	glMatrixMode(GL_MODELVIEW);
-
 	Mobo mobo;
 	CPU cpu;
 	RAM ram(1 << 20);	// 1Mb ram
-	VGA vga([&] (int x, int y, int color) {
+	VGA vga([&] (int xi, int yi, int color) {
 		float r = (((0x000000ff & color) >> 0 ) & 0xff) / float(256); 
 		float g = (((0x0000ff00 & color) >> 8 ) & 0xff) / float(256); 
 		float b = (((0x00ff0000 & color) >> 16) & 0xff) / float(256); 
 		
-		glBegin(GL_POINTS);
+		float side_x = display.width / float(vga.width);
+		float side_y = display.height / float(vga.height);
+
+		float x = xi * side_x;
+		float y = display.height - yi * side_y;
+
+		glBegin(GL_QUADS);
 			glColor3f(r, g, b);
-			glVertex2i(x, display.height / window_scale - y);
+			glVertex2f(x, y);
+			glVertex2f(x + side_x, y);
+			glVertex2f(x + side_x, y + side_y);
+			glVertex2f(x, y + side_y);
 		glEnd();
 	}, [&]{
 		display.swapBuffers();
 	}, [&]{
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, display.width, 0, display.height, 1, -1); 
+		glMatrixMode(GL_MODELVIEW);
+
 		display.focus();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	});
@@ -121,7 +129,8 @@ int main(int argc, char const *argv[]) {
 		vga.focus();
 		vga.display_text();
 		vga.swapBuffers();
-		mobo.update();
+		std::cout << "this" << std::endl;
+		// mobo.update();
 	}
 
 	// if (th.joinable())
