@@ -51,6 +51,7 @@ struct Mobo {
 					}
 					std::cout << (a & (1 << i)) << " ";
 				}
+				std::cout << std::endl;
 			}
 		}
 		else if (original != b)

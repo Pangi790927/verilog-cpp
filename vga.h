@@ -34,10 +34,10 @@ struct VGA {
 	bool present = false;
 	std::shared_ptr<Vvga> chip = std::shared_ptr<Vvga>(new Vvga);
 	
-	const size_t width = 640;
-	const size_t height = 480;
-	const size_t char_width = 8;
-	const size_t char_height = 20;
+	static const size_t width = 640;
+	static const size_t height = 480;
+	static const size_t char_width = 8;
+	static const size_t char_height = 20;
 
 	size_t size = width * height;
 	std::shared_ptr<int[]> vmem = std::shared_ptr<int[]>(new int[size]);
@@ -115,8 +115,8 @@ struct VGA {
 		0x00ff'0000, // blue
 		0x0000'8000, // green
 		0x00ff'ff00, // cyan
-		0x0000'00ff, // red
-		0x00ff'00ff, // magenta
+		0x0000'0080, // red
+		0x0080'0080, // magenta
 		0x002A'2AA5, // brown 
 		0x00D3'D3D3, // light gray 
 
@@ -124,10 +124,10 @@ struct VGA {
 		0x00e6'D8Ad, // light blue
 		0x0000'ff00, // light green
 		0x00ff'ffe0, // light cyan
-		0x0000'0000, // light red
-		0x0000'0000, // light magenta
-		0x0000'0000, // yellow
-		0x0000'0000  // white
+		0x0000'00ff, // light red
+		0x00ff'00ff, // light magenta
+		0x0000'ffff, // yellow
+		0x00ff'ffff  // white
 	};
 };
 
