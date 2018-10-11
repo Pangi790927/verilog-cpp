@@ -32,7 +32,6 @@ struct Mobo {
 
 	template <typename Type>
 	void update_changed (Type& a, Type& b, Type& original) {
-		std::cout << util::str_type(a) << std::endl;
 		if (original != a) {
 			if (original != b)
 				std::cout << "both changed, not good" << std::endl;
