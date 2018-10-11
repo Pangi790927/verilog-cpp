@@ -37,9 +37,9 @@ struct VGA {
 	std::shared_ptr<Vvga> chip = std::shared_ptr<Vvga>(new Vvga);
 	
 	static const size_t width = 640;
-	static const size_t height = 480;
+	static const size_t height = 350;
 	static const size_t char_width = 8;
-	static const size_t char_height = 20;
+	static const size_t char_height = 14;
 
 	size_t size = width * height;
 	std::shared_ptr<int[]> vmem = std::shared_ptr<int[]>(new int[size]);
@@ -48,9 +48,9 @@ struct VGA {
 	std::function<void(void)> focus;
 
 	VGA() {}
-	VGA (std::function<void(int, int, uint)> putpixel,
-			std::function<void(void)> swapBuffers,
-			std::function<void(void)> focus)
+	VGA (const std::function<void(int, int, uint)>& putpixel,
+			const std::function<void(void)>& swapBuffers,
+			const std::function<void(void)>& focus)
 	: putpixel(putpixel), swapBuffers(swapBuffers), focus(focus) {}
 
 	void update (bool clk) {
@@ -94,13 +94,14 @@ struct VGA {
 		for (int i = 0; i < height / char_height; i++)
 			for (int j = 0; j < width / char_width; j++)
 				put_char_at(vmem[i * width / char_width + j],
-						j * char_width, i * char_height);
+						i * char_height, j * char_width);
 	}
 
 	void put_char_at (uint color_char, int x, int y) {
 		char to_print = color_char & 0xff;
-		uint bg_color = colors[(color_char & 0xff00) >> 8];
-		uint fg_color = colors[(color_char & 0xff0000) >> 16];
+		uint fg_color = colors[(color_char & 0xff00) >> 8];
+		uint bg_color = colors[(color_char & 0xff0000) >> 16];
+
 		for (int i = 0; i < char_height; i++)
 			for (int j = 0; j < char_height; j++)
 				if (char_display[to_print][i][j])
@@ -109,7 +110,56 @@ struct VGA {
 					putpixel(j + y, i + x, bg_color);
 	}
 
-	bool char_display[256][char_height][char_width];
+	bool char_display[256][char_height][char_width] = {
+		{
+			{0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 1, 1, 1, 0, 0, 0},
+			{0, 1, 1, 1, 1, 0, 0, 0},
+			{0, 1, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0}
+		},
+		{
+			{0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 1, 1, 1, 0, 0, 0},
+			{0, 1, 1, 1, 1, 0, 0, 0},
+			{0, 1, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 1, 1, 1, 1, 0, 0, 0},
+			{0, 1, 1, 1, 1, 0, 0, 0},
+			{0, 1, 1, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0}
+		},
+		{
+			{0, 0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 1, 1, 1, 0, 0, 0},
+			{0, 1, 1, 1, 1, 0, 0, 0},
+			{0, 1, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 1},
+			{0, 0, 0, 1, 1, 0, 0, 1},
+			{0, 0, 0, 1, 1, 0, 0, 1},
+			{0, 1, 1, 1, 1, 0, 0, 1},
+			{0, 1, 1, 1, 1, 0, 0, 1},
+			{0, 1, 1, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 1, 1, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0, 0}
+		}
+	};
 	
 	/* those colors are abgr not rgba reason is that */
 	uint colors[256] = {

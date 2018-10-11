@@ -60,11 +60,13 @@ double sc_time_stamp () {
 
 int main(int argc, char const *argv[]) {
 	Verilated::commandArgs(argc, argv);
-	OpenglWindow display(640, 480, "VGA Display");
+	float window_scale = 1.5;
+	OpenglWindow display(640 * window_scale, 350 * window_scale, "VGA Display");
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0, display.width, 0, display.height, 1, -1); 
+	glOrtho(0, display.width / window_scale, 0,
+			display.height / window_scale, 1, -1); 
 	glMatrixMode(GL_MODELVIEW);
 
 	Mobo mobo;
@@ -77,7 +79,7 @@ int main(int argc, char const *argv[]) {
 		
 		glBegin(GL_POINTS);
 			glColor3f(r, g, b);
-			glVertex2i(x, display.height - y);
+			glVertex2i(x, display.height / window_scale - y);
 		glEnd();
 	}, [&]{
 		display.swapBuffers();
@@ -86,28 +88,44 @@ int main(int argc, char const *argv[]) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	});
 
-	auto th = std::thread([&](){
-		// better spawn thread that will create interrupt
-		// when key is ready
+	// auto th = std::thread([&](){
+	// 	// better spawn thread that will create interrupt
+	// 	// when key is ready
 
 		// get key if exists
-		while (display.active)
-			if(display.handleInput())
-				if (display.keyboard.getKeyState(display.keyboard.ESC))
-					display.requestClose();
-			// else if (!display.keyboard.queEmpty())
-			// 	spawn interrupt display.keyboard.popEvent();
-	});
+	// 	while (display.active)
+	// 		if(display.handleInput())
+	// 			if (display.keyboard.getKeyState(display.keyboard.ESC))
+	// 				display.requestClose();
+	// 		// else if (!display.keyboard.queEmpty())
+	// 		// 	spawn interrupt display.keyboard.popEvent();
+	// });
 
 	mobo.insertCpu(cpu);
 	mobo.insertRam(ram);
 	mobo.initVga(vga);
 
-	while (display.active)
-		mobo.update();
+	while (display.active) {
+		if(display.handleInput())
+			if (display.keyboard.getKeyState(display.keyboard.ESC))
+				display.requestClose();
 
-	if (th.joinable())
-		th.join();
+		vga.vmem[0] = 0x0000'0200 + 0;
+		vga.vmem[1] = 0x0000'0300 + 1;
+		vga.vmem[2] = 0x0000'0400 + 2;
+		vga.vmem[3] = 0x0000'0500 + 0;
+		vga.vmem[4] = 0x0000'0600 + 1;
+		vga.vmem[5] = 0x0000'0700 + 2;
+		vga.vmem[6] = 0x0000'0800 + 0;
+		vga.vmem[86] = 0x0000'0900 + 1;
+		vga.focus();
+		vga.display_text();
+		vga.swapBuffers();
+		mobo.update();
+	}
+
+	// if (th.joinable())
+	// 	th.join();
 
 	// while () {
 	// 	// right now the window will exit at esc
