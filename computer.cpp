@@ -130,7 +130,6 @@ int main(int argc, char const *argv[]) {
 		vga.focus();
 		vga.display_text();
 		vga.show();
-		std::cout << "this" << std::endl;
 		mobo.update();
 	}
 

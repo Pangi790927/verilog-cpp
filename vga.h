@@ -3,7 +3,7 @@
 
 #include <memory>
 #include "obj_dir/Vvga.h"
-//#include "fonts.h"
+#include "fonts.h"
 
 struct VGA {
 	enum {
@@ -50,7 +50,10 @@ struct VGA {
 	VGA (const std::function<void(int, int, uint)>& putpixel,
 			const std::function<void(void)>& show,
 			const std::function<void(void)>& focus)
-	: putpixel(putpixel), show(show), focus(focus) {}
+	: putpixel(putpixel), show(show), focus(focus)
+	{
+		fonts::test();
+	}
 
 	void update (bool clk) {
 		chip->clk = clk;
