@@ -24,7 +24,7 @@ namespace fonts {
 	 * @return
 	 */
 	void readBitmapData(std::fstream &fh, bitmap_header &hp, bmp_data &bmp) {
-	    bmp.originalLineSize = hp.width * 3;
+	    bmp.originalLineSize = hp.width * 4;
 	    bmp.workLineSize = bmp.originalLineSize + 4 - bmp.originalLineSize % 4;
 	    bmp.padding = bmp.workLineSize - bmp.originalLineSize;
 
@@ -50,8 +50,33 @@ namespace fonts {
 	    //size_t n = fread(bmp.data, sizeof(char), bmp.size, fp);
 	    fh.read(bmp.data, bmp.size);
 
-	    for (int i = 0; i < bmp.size; ++i) {
-	    	std::cout << (int) bmp.data[i];
+	    /*for (int i = 0; i < hp.height; ++i) {
+	    	for (int j = 0; j < bmp.workLineSize / 3; ++j) {
+	    		for (int k = 0; k < 3; ++k) {
+	    			std::cout << (int) bmp.data[i *  bmp.workLineSize + j * 3 + k];
+	    		}
+	    	}
+	    }*/
+
+	    for (int i = 0; i < 256; ++i) {
+	    	for (int k = 13; k >= 0; k--) {
+    			for (int j = 0; j < 8; ++j) {
+    				// i = index ascii caracter
+    				// k pixel relativ y
+    				// j pixel relativ x
+    				//(i * 8 + j) * 3
+    				//std::cout << (int) bmp.data[(i * 8 + j) * 4 + k * bmp.workLineSize + 1];
+
+	    			if ( bmp.data[(i * 8 + j) * 4 + k * bmp.workLineSize + 1] == 0) {
+	    				std::cout<<"*";
+	    			} else {
+	    				std::cout<<" ";
+	    			}
+	    		}
+	    		std::cout << std::endl;
+    		}
+    		std::cout << std::endl;
+    		std::cout << std::endl;
 	    }
 	}
 
