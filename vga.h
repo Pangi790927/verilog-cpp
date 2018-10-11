@@ -3,8 +3,7 @@
 
 #include <memory>
 #include "obj_dir/Vvga.h"
-#include "bmp_data.h"
-#include "bmp_header.h"
+//#include "fonts.h"
 
 struct VGA {
 	enum {
