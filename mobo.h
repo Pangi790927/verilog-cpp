@@ -38,20 +38,20 @@ struct Mobo {
 			else {
 				b = a;
 
-				std::cout << "Printing bits of a: ";
-				for (uint i = 0; i < 8 * sizeof(Type); ++i) {
-					bool cba = (a & (1 << i));
-					bool cbb = (b & (1 << i));
-					bool cbo = (original & (1 << i));
+				// std::cout << "Printing bits of a: ";
+				// for (uint i = 0; i < 8 * sizeof(Type); ++i) {
+				// 	bool cba = (a & (1 << i));
+				// 	bool cbb = (b & (1 << i));
+				// 	bool cbo = (original & (1 << i));
 
-					if (cba == 0 && cba != cbb) {
+				// 	if (cba == 0 && cba != cbb) {
 
-					} else if (cba != cbb) {
+				// 	} else if (cba != cbb) {
 
-					}
-					std::cout << (a & (1 << i)) << " ";
-				}
-				std::cout << std::endl;
+				// 	}
+				// 	// std::cout << (a & (1 << i)) << " ";
+				// }
+				// std::cout << std::endl;
 			}
 		}
 		else if (original != b)

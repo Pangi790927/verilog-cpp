@@ -7,10 +7,8 @@
 
 struct VGA {
 	enum {
-		DISPLAY_NOW		= 0b0000'0000'0000'0001,
-		WRITE_PIXEL		= 0b0000'0000'0000'0010,
-		TEXT_MODE		= 0b0000'0000'0000'0100,	// 1 for text, 0 for graphic
-		CLEAR_BIT		= 0b0000'0000'0000'1000
+		WRITE			= 0b0000'0000'0000'0001,
+		TEXT_MODE		= 0b0000'0000'0000'0010,	// 1 for text, 0 for graphic
 	};
 
 	enum {
@@ -39,18 +37,16 @@ struct VGA {
 	static const size_t height = 350;
 	static const size_t char_width = 8;
 	static const size_t char_height = 14;
+	static const size_t text_row_count = height / char_height;
+	static const size_t text_col_count = width / char_width;
 
 	size_t size = width * height;
 	std::shared_ptr<int[]> vmem = std::shared_ptr<int[]>(new int[size]);
 	std::function<void(int, int, uint)> putpixel;
-	std::function<void(void)> show;
-	std::function<void(void)> focus;
 
 	VGA() {}
-	VGA (const std::function<void(int, int, uint)>& putpixel,
-			const std::function<void(void)>& show,
-			const std::function<void(void)>& focus)
-	: putpixel(putpixel), show(show), focus(focus)
+	VGA (const std::function<void(int, int, uint)>& putpixel)
+	: putpixel(putpixel)
 	{
 		fonts::test();
 	}
@@ -60,31 +56,16 @@ struct VGA {
 		chip->rst = 0;
 
 		/* vga specific: */
-		if (chip->ctrl & WRITE_PIXEL) {
-			vmem[chip->addr] = chip->data;
-			chip->ctrl &= ~WRITE_PIXEL;
-		}
-		if (chip->ctrl & DISPLAY_NOW) {
-			focus();
+		if (chip->ctrl & WRITE) {
 			if (chip->ctrl & TEXT_MODE) {
-				display_text();
+				vmem[chip->addr] = chip->data; // we keep it in memory
+				insert_char(chip->data, chip->addr);
 			}
-			else
-				for (int i = 0; i < height; i++)
-					for (int j = 0; j < width; j++)
-						putpixel(j, i, vmem[i * width + j]);
-
-			show();
-			chip->ctrl &= ~DISPLAY_NOW;
-		}
-		if (chip->ctrl & CLEAR_BIT) {
-			focus();
-			memset(vmem.get(), 0, size);
-			for (int i = 0; i < height; i++)
-				for (int j = 0; j < width; j++)
-					putpixel(j, i, vmem[i * width + j]);
-			show();
-			chip->ctrl &= ~CLEAR_BIT;
+			else {
+				vmem[chip->addr] = chip->data;
+				putpixel(chip->addr %width, chip->addr / width, chip->data);
+			}
+			chip->ctrl &= ~WRITE;
 		}
 		/* end vga specific */
 		
@@ -92,11 +73,11 @@ struct VGA {
 	}
 
 	/* a character will be displayed inside a 20:8 pixels*/
-	void display_text() {
-		for (int i = 0; i < height / char_height; i++)
-			for (int j = 0; j < width / char_width; j++)
-				put_char_at(vmem[i * width / char_width + j],
-						i * char_height, j * char_width);
+	void insert_char (uint color_char, int index) {
+		int x = (index % text_col_count) * char_width;
+		int y = (index / text_col_count) * char_height;
+
+		put_char_at(color_char, x, y);
 	}
 
 	void put_char_at (uint color_char, int x, int y) {
@@ -105,14 +86,14 @@ struct VGA {
 		uint bg_color = colors[(color_char & 0xff0000) >> 16];
 
 		for (int i = 0; i < char_height; i++)
-			for (int j = 0; j < char_height; j++)
-				if (char_display[to_print][i][j])
-					putpixel(j + y, i + x, fg_color);
+			for (int j = 0; j < char_width; j++)
+				if (char_font[to_print][i][j])
+					putpixel(j + x, i + y, fg_color);
 				else
-					putpixel(j + y, i + x, bg_color);
+					putpixel(j + x, i + y, bg_color);
 	}
 
-	bool char_display[256][char_height][char_width] = {
+	bool char_font[256][char_height][char_width] = {
 		{
 			{0, 0, 0, 0, 0, 0, 0, 0},
 			{0, 0, 0, 1, 1, 0, 0, 0},
@@ -163,25 +144,26 @@ struct VGA {
 		}
 	};
 	
-	/* those colors are abgr not rgba reason is that */
+	/* those colors are abgr not rgba reason is that most semnificant
+		bytes are red */
 	uint colors[256] = {
-		0x0000'0000, // black
-		0x00ff'0000, // blue
-		0x0000'8000, // green
-		0x00ff'ff00, // cyan
-		0x0000'0080, // red
-		0x0080'0080, // magenta
-		0x002A'2AA5, // brown 
-		0x00D3'D3D3, // light gray 
+		0x00'00'00'00, // black
+		0x00'aa'00'00, // blue
+		0x00'00'aa'00, // green
+		0x00'aa'aa'00, // cyan
+		0x00'00'00'aa, // red
+		0x00'aa'00'aa, // magenta
+		0x00'aa'55'aa, // brown 
+		0x00'aa'aa'aa, // light gray 
 
-		0x00A9'A9A9, // dark gray
-		0x00e6'D8Ad, // light blue
-		0x0000'ff00, // light green
-		0x00ff'ffe0, // light cyan
-		0x0000'00ff, // light red
-		0x00ff'00ff, // light magenta
-		0x0000'ffff, // yellow
-		0x00ff'ffff  // white
+		0x00'55'55'55, // dark gray
+		0x00'ff'55'55, // light blue
+		0x00'55'ff'55, // light green
+		0x00'ff'ff'55, // light cyan
+		0x00'55'55'ff, // light red
+		0x00'ff'55'ff, // light magenta
+		0x00'55'ff'ff, // yellow
+		0x00'ff'ff'ff  // white
 	};
 };
 

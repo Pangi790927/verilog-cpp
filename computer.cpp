@@ -1,9 +1,12 @@
 #include <iostream>
 #include <thread>
+#include <atomic>
+#include <chrono>
 #include <verilated.h>
 #include "obj_dir/Vcpu.h"
 #include "OpenglWindow.h"
 #include "mobo.h"
+#include "gl_screen.h"
 
 /* Current simulation time */
 vluint64_t main_time = 0; 
@@ -60,106 +63,66 @@ double sc_time_stamp () {
 
 int main(int argc, char const *argv[]) {
 	Verilated::commandArgs(argc, argv);
-	float window_scale = 1.5;
-	OpenglWindow display(640 * window_scale, 350 * window_scale, "VGA Display");
+
+	float window_scale = 640. / 640;
+	OpenglWindow display(VGA::width * window_scale,
+			VGA::height * window_scale, "VGA Display");
+
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_DEPTH_TEST);
+	GlScreen gl_screen(VGA::width, VGA::height);
+	std::atomic<bool> io_close = false;
 
 	Mobo mobo;
 	CPU cpu;
 	RAM ram(1 << 20);	// 1Mb ram
 	VGA vga([&] (int xi, int yi, int color) {
-		float r = (((0x000000ff & color) >> 0 ) & 0xff) / float(256); 
-		float g = (((0x0000ff00 & color) >> 8 ) & 0xff) / float(256); 
-		float b = (((0x00ff0000 & color) >> 16) & 0xff) / float(256); 
-		
-		float side_x = display.width / float(vga.width);
-		float side_y = display.height / float(vga.height);
-
-		float x = xi * side_x;
-		float y = display.height - yi * side_y;
-
-		glBegin(GL_QUADS);
-			glColor3f(r, g, b);
-			glVertex2f(x, y);
-			glVertex2f(x + side_x, y);
-			glVertex2f(x + side_x, y + side_y);
-			glVertex2f(x, y + side_y);
-		glEnd();
-	}, [&]{
-		display.swapBuffers();
-	}, [&]{
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0, display.width, 0, display.height, 1, -1); 
-		glMatrixMode(GL_MODELVIEW);
-
-		display.focus();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		gl_screen.put_pixel(color, xi, yi);
 	});
-
-	// auto th = std::thread([&](){
-	// 	// better spawn thread that will create interrupt
-	// 	// when key is ready
-
-		// get key if exists
-	// 	while (display.active)
-	// 		if(display.handleInput())
-	// 			if (display.keyboard.getKeyState(display.keyboard.ESC))
-	// 				display.requestClose();
-	// 		// else if (!display.keyboard.queEmpty())
-	// 		// 	spawn interrupt display.keyboard.popEvent();
-	// });
 
 	mobo.insertCpu(cpu);
 	mobo.insertRam(ram);
 	mobo.initVga(vga);
+	
+	auto io_thread = std::thread([&](){
+		// put display in here and put a cv to pass when init done
+		while (display.active) {
+			if(display.handleInput())
+				if (display.keyboard.getKeyState(display.keyboard.ESC))
+					display.requestClose();
+				// if (other) put in cirular buffer and raise interrupt
+			display.focus();
 
-	while (display.active) {
-		if(display.handleInput())
-			if (display.keyboard.getKeyState(display.keyboard.ESC))
-				display.requestClose();
+			// gl_screen might need to be secured
+			// the same with io_close
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			gl_screen.render();
 
-		vga.vmem[0] = 0x0000'0200 + 0;
-		vga.vmem[1] = 0x0000'0300 + 1;
-		vga.vmem[2] = 0x0000'0400 + 2;
-		vga.vmem[3] = 0x0000'0500 + 0;
-		vga.vmem[4] = 0x0000'0600 + 1;
-		vga.vmem[5] = 0x0000'0700 + 2;
-		vga.vmem[6] = 0x0000'0800 + 0;
-		vga.vmem[86] = 0x0000'0900 + 1;
-		
-		vga.focus();
-		vga.display_text();
-		vga.show();
+			display.swapBuffers();
+		}
+		io_close = true;
+	});
+
+	volatile int x = 0;
+	auto profiler = std::thread([&]{
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::cout << x / 1000'000. << " MHz" << std::endl;
+	});
+
+	while (!io_close) {
+		for (int i = 0; i < 16; i++)
+			for (int j = 0; j < 16; j++)
+				vga.insert_char((i << 16) + (j << 8) /* + 'a' */,
+						i * VGA::text_col_count + j);
+		vga.insert_char(0x00010000, 80 * 25 - 1);
+		x++;
 		mobo.update();
 	}
 
-	// if (th.joinable())
-	// 	th.join();
+	if (profiler.joinable())
+		profiler.join();
+	if (io_thread.joinable())
+		io_thread.join();
 
-	// while () {
-	// 	// right now the window will exit at esc
-	// 	if (display.handleInput()) {
-	// 		if (display.keyboard.getKeyState(display.keyboard.ESC))
-	// 			display.requestClose();
-	// 		else {
-	// 			while (!display.keyboard.queEmpty()) {
-	// 				// keyboard driver could stay here
-	// 				display.keyboard.popEvent(); // the key
-	// 			}
-	// 		}
-	// 	}
-	// 	display.focus();
-
-	// 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// 	glBegin(GL_QUADS);
-	// 		glColor3f(0.5, 0.5, 0.5);
-	// 		glVertex2i(10, 100);
-	// 		glVertex2i(100, 200);
-	// 		glVertex2i(300, 10);			
-	// 		glVertex2i(10, 10);
-	// 	glEnd();
-		
-	// 	display.swapBuffers();
-	// }
 	return 0;
 }

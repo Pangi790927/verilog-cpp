@@ -1,5 +1,5 @@
 INCLUDES := -I /usr/share/verilator/include/ -I Window/ -I Misc/
-CXX_FLAGS := -std=c++17 -pthread
+CXX_FLAGS := -std=c++17 -pthread -O3
 LD_FLAGS := -lGLEW -lGLU -lGL -lX11
 
 OBJS := /usr/share/verilator/include/verilated.cpp

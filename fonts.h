@@ -51,7 +51,7 @@ namespace fonts {
 	    fh.read(bmp.data, bmp.size);
 
 	    for (int i = 0; i < bmp.size; ++i) {
-	    	std::cout << (int) bmp.data[i];
+	    	// std::cout << (int) bmp.data[i];
 	    }
 	}
 
