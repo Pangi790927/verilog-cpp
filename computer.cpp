@@ -134,7 +134,7 @@ int main(int argc, char const *argv[]) {
 		for (int i = 0; i < 256; i++)
 			vga.insert_char(0x0000'0f'00 + i, i + 16 * VGA::text_col_count);
 
-		vga.insert_char(0x0000'0f'00 + '*', 80 * 25 - 1);
+		vga.insert_char(0x0000'0f'00 + 0, 80 * 25 - 1);
 		x++;
 		mobo.update();
 	}
