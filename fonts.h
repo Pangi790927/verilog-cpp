@@ -32,7 +32,7 @@ namespace fonts {
 	        bmp.workLineSize = bmp.originalLineSize; //in cazul in care nu trebuie sa mai adaugam padding
 	        bmp.padding = 0;
 	    }
-	    std::cout<<"Padding:"<<bmp.padding<<std::endl;
+	    std::cout<< "Padding:" << bmp.padding << std::endl;
 
 
 	    bmp.size = (size_t) (hp.height * bmp.workLineSize);
@@ -58,6 +58,7 @@ namespace fonts {
 	    	}
 	    }*/
 
+	    std::cout << std::endl;
 	    for (int i = 0; i < 256; ++i) {
 	    	for (int k = 13; k >= 0; k--) {
     			for (int j = 0; j < 8; ++j) {
@@ -67,7 +68,7 @@ namespace fonts {
     				//(i * 8 + j) * 3
     				//std::cout << (int) bmp.data[(i * 8 + j) * 4 + k * bmp.workLineSize + 1];
 
-	    			if ( bmp.data[(i * 8 + j) * 4 + k * bmp.workLineSize + 1] == 0) {
+	    			if (bmp.data[(i * 8 + j) * 4 + k * bmp.workLineSize + 1] == 0) {
 	    				std::cout<<"*";
 	    			} else {
 	    				std::cout<<" ";
@@ -80,7 +81,7 @@ namespace fonts {
 	    }
 	}
 
-	void test() {
+	void test () {
 		std::cout << "sal" << std::endl;
 		std::fstream fbitmap;
 		fbitmap.open("fonts/font.bmp" , std::fstream::in | std::fstream::binary);

@@ -65,27 +65,23 @@ int main(int argc, char const *argv[]) {
 	Verilated::commandArgs(argc, argv);
 
 	float window_scale = 640. / 640;
-	OpenglWindow display(VGA::width * window_scale,
-			VGA::height * window_scale, "VGA Display");
-
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_DEPTH_TEST);
-	GlScreen gl_screen(VGA::width, VGA::height);
 	std::atomic<bool> io_close = false;
+	util::SyncCond io_sync;
+	util::SyncCond gl_sync;
 
-	Mobo mobo;
-	CPU cpu;
-	RAM ram(1 << 20);	// 1Mb ram
-	VGA vga([&] (int xi, int yi, int color) {
-		gl_screen.put_pixel(color, xi, yi);
-	});
+	GlScreen *pgl_screen;
+	std::mutex screen_mu;
 
-	mobo.insertCpu(cpu);
-	mobo.insertRam(ram);
-	mobo.initVga(vga);
-	
 	auto io_thread = std::thread([&](){
-		// put display in here and put a cv to pass when init done
+		OpenglWindow display(VGA::width * window_scale,
+				VGA::height * window_scale, "VGA Display");
+		
+		glEnable(GL_TEXTURE_2D);
+		GlScreen gl_screen(VGA::width, VGA::height);
+		pgl_screen = &gl_screen;
+
+		io_sync.notify();
+
 		while (display.active) {
 			if(display.handleInput())
 				if (display.keyboard.getKeyState(display.keyboard.ESC))
@@ -93,15 +89,35 @@ int main(int argc, char const *argv[]) {
 				// if (other) put in cirular buffer and raise interrupt
 			display.focus();
 
-			// gl_screen might need to be secured
-			// the same with io_close
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			gl_screen.render();
+
+			// a pitfall here is that this function redraws the screen
+			// asyncroniously, we should be signaled to redraw, else just
+			// wait for a time
+			{
+				std::lock_guard<std::mutex> guard(screen_mu);
+				gl_screen.render();
+			}
 
 			display.swapBuffers();
 		}
 		io_close = true;
+		io_sync.wait();
 	});
+
+	io_sync.wait();
+
+	Mobo mobo;
+	CPU cpu;
+	RAM ram(1 << 20);	// 1Mb ram
+	VGA vga([&] (int xi, int yi, int color) {
+		std::lock_guard<std::mutex> guard(screen_mu);
+		pgl_screen->put_pixel(color, xi, yi);
+	});
+
+	mobo.insertCpu(cpu);
+	mobo.insertRam(ram);
+	mobo.initVga(vga);
 
 	volatile int x = 0;
 	auto profiler = std::thread([&]{
@@ -112,12 +128,18 @@ int main(int argc, char const *argv[]) {
 	while (!io_close) {
 		for (int i = 0; i < 16; i++)
 			for (int j = 0; j < 16; j++)
-				vga.insert_char((i << 16) + (j << 8) /* + 'a' */,
-						i * VGA::text_col_count + j);
-		vga.insert_char(0x00010000, 80 * 25 - 1);
+				vga.insert_char(((i << 16) & 0xff0000) + ((j << 8) & 0xff00)
+						+ 0, i * VGA::text_col_count + j);
+
+		for (int i = 0; i < 256; i++)
+			vga.insert_char(0x0000'0f'00 + i, i + 16 * VGA::text_col_count);
+
+		vga.insert_char(0x0000'0f'00 + '*', 80 * 25 - 1);
 		x++;
 		mobo.update();
 	}
+
+	io_sync.notify();
 
 	if (profiler.joinable())
 		profiler.join();
