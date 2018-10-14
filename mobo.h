@@ -12,7 +12,8 @@
 	static decltype(a) old = b = a;									\
 	if (typeid(a) != typeid(b))										\
 		std::cout << "type mismatch in update rule" << std::endl;	\
-	update_changed(a, b, old);										\
+	old = a & ~old & ~b | b & a | ~old & b;							\
+	a = b = old;													\
 }
 
 struct Mobo {
@@ -28,35 +29,6 @@ struct Mobo {
 	Mobo() {
 		// bridge is part of mobo
 		bridge.present = true;
-	}
-
-	template <typename Type>
-	void update_changed (Type& a, Type& b, Type& original) {
-		if (original != a) {
-			if (original != b)
-				std::cout << "both changed, not good" << std::endl;
-			else {
-				b = a;
-
-				// std::cout << "Printing bits of a: ";
-				// for (uint i = 0; i < 8 * sizeof(Type); ++i) {
-				// 	bool cba = (a & (1 << i));
-				// 	bool cbb = (b & (1 << i));
-				// 	bool cbo = (original & (1 << i));
-
-				// 	if (cba == 0 && cba != cbb) {
-
-				// 	} else if (cba != cbb) {
-
-				// 	}
-				// 	// std::cout << (a & (1 << i)) << " ";
-				// }
-				// std::cout << std::endl;
-			}
-		}
-		else if (original != b)
-			a = b;
-		original = a;
 	}
 
 	void insertCpu (const CPU& cpu) {
@@ -103,10 +75,71 @@ struct Mobo {
 		for (auto&& link : links)
 			link();	// propagates respective signal(s)
 	}
-
-	void updateConnections() {
-
-	}
 };
 
+/*
+	a better solution for wiring cables:
+	let's take an example (brg stands for bridge):
+	old: 0110 1010
+	cpu: 1010 0110
+	brg: 0101 1000
+
+	so the pins that changed here are (x signifies no change)
+	cpu: 10xx 01xx
+	brg: xx01 xx0x
+
+	as we can see, we have might not have simultaneous changes, that
+	meaning from our observation the bridge and the cpu don't enforce
+	the same pins at the same time. We might have the cpu enforcing
+	pin 0 on low and brg enforccing pin 0 on high but that is obviously a
+	bug and we will not take it into consideration.
+
+	now to create a mask of the changes we can xor the new values with the
+	old ones:
+
+	old: 0110 1010 ^
+	cpu: 1010 0110
+	--------------
+		 1100 1100
+
+	old: 0110 1010 ^
+	brg: 0101 1001
+	--------------
+		 0011 0011
+
+	so to retain only what changed by the cpu we can do (cpu ^ old) & cpu and
+	to retain only what changed from the bridge we can do (brg ^ old) & brg.
+	finally to get what didn't change we can (cpu ^ old | brg ^ old) & old.
+
+	we get a final equation for the modifications on the wire:
+	((cpu ^ old) & cpu) | ((brg ^ old) & brg) | (~(cpu ^ old | brg ^ old) & old)
+
+	we have only 3 variables and we can see that this formula is invariant to
+	the number of pins of the variables (each need to have the same number of
+	pins but the actual number does not matter).
+
+	we can create the following table:
+	old cpu brg formula
+	0	0	0		0
+	0	0	1		1
+	0	1	0		1
+	0	1	1		x	(this case is degenerate but it would result in 1)
+	1	0	0		x	(this case is degenerate but it would result in 0)
+	1	0	1		0
+	1	1	0		0
+	1	1	1		1
+
+	so now we build the following table:
+		old cpu :	00	01	11	10
+		brg		:0	0	1	0	0
+				:1	1	1	1	0
+
+	considering degenerate cases (we can see it does not help us):
+		old cpu :	00	01	11	10
+		brg		:0	0	1	0	x
+				:1	1	x	1	0
+
+	so now we can build the new formula:
+	new = brg & ~old & ~cpu | cpu & brg | ~old & cpu;
+*/
 #endif
