@@ -1,3 +1,5 @@
+// https://stackoverflow.com/questions/10617215/how-to-write-your-own-code-generator-backend-for-gcc
+
 module cpu(
 	// clk, rst - those are required on all devices
 		input				clk,
@@ -30,9 +32,10 @@ module cpu(
 		else if (clk) begin
 			addr = addr + 1;
 			// $display("cpu: %d", addr);
+			// $display("cpu: clk on pzitive edge");
+
 			if (!ctrl[0]) begin
 				ctrl[0] = 1;
-				// $display("cpu: ctrl changed");
 			end else begin
 				// $display("cpu: ctrl unchanged");
 			end

@@ -5,6 +5,7 @@
 #include "obj_dir/Vvga.h"
 #include "fonts.h"
 
+
 struct VGA {
 	enum {
 		WRITE			= 0b0000'0000'0000'0001,

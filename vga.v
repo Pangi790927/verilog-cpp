@@ -1,3 +1,5 @@
+// address space 0x100'000 - 0x200'000
+
 module vga(
 	// clk, rst - those are required on all devices
 		input				clk,

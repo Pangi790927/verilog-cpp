@@ -1,3 +1,12 @@
+// bios 0 - 32k
+// vga 1M - 2M
+// hdd - pci sata ??
+// ram - 2M -> inf
+// control - 32k - 48k
+// sunete - 48k - 112k
+
+`include "control_pins.v"
+
 module bridge(
 	// clk, rst - those are required on all devices
 		input				clk,
