@@ -48,7 +48,7 @@ struct VGA {
 	VGA (const std::function<void(int, int, uint)>& putpixel)
 	: putpixel(putpixel)
 	{
-		fonts::test();
+		fonts::load<char_height, char_width>(char_font);
 	}
 
 	void update (bool clk) {
