@@ -59,17 +59,18 @@ struct VGA {
 		/* vga specific: */
 		if (chip->ctrl & WRITE) {
 			if (chip->ctrl & TEXT_MODE) {
-				vmem[chip->addr] = chip->data; // we keep it in memory
-				insert_char(chip->data, chip->addr);
+				vmem[chip->phy_addr] = chip->phy_data; // we keep it in memory
+				insert_char(chip->phy_data, chip->phy_addr);
 			}
 			else {
-				vmem[chip->addr] = chip->data;
-				putpixel(chip->addr %width, chip->addr / width, chip->data);
+				vmem[chip->phy_addr] = chip->data;
+				putpixel(chip->phy_addr %width, chip->phy_addr
+						/ width, chip->phy_data);
 			}
 			chip->ctrl &= ~WRITE;
 		}
 		/* end vga specific */
-		
+
 		chip->eval();
 	}
 
