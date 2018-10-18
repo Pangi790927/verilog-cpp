@@ -45,7 +45,7 @@ double sc_time_stamp () {
 // writes what it wants in ram in it's data register and sets write flag instead
 // of read flag
 //
-// working with vga:
+// working with vga (THIS IS NO LONGER THE TARGETED BEHAVIOR):
 // * cpu writes in vga memory instad of ram (mmap and bridge will do the job)
 // * after many writes cpu writes with iomap
 // * bridge sees io register changed so it propagates the change to the specific
