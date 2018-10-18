@@ -28,8 +28,8 @@ module bridge(
 		inout	reg	[15:0]	vga_ctrl
 	);
 
-	reg [15:0] state;
-	reg [15:0] next_state;
+	reg [15:0] state = 0;
+	reg [15:0] next_state = 0;
 
 	initial begin
 		// bridge initialization
@@ -42,11 +42,25 @@ module bridge(
 		else if (clk) begin
 			/* write to vga */
 
-			if (!vga_ctrl[`VGA_WRITE_PIN]) begin
-				vga_data = 32'h00_00_01_2B;
-				vga_addr = 1;
-				vga_ctrl[`VGA_WRITE_PIN] = 1; 
-			end /* else don't switch state */
+			case (state)
+				0: begin
+					vga_data = 32'h00_00_01_2B;
+					vga_addr = 1;
+					vga_ctrl[`VGA_WRITE_PIN] = 1;
+					vga_ctrl[`VGA_MODE_PIN] = 1;
+					state = 1;
+					$display("signaled vga chip");
+				end
+				1: begin
+					if (!vga_ctrl[`VGA_WRITE_PIN]) begin
+						$display("am terminat");
+						state = 2;
+					end /* else don't switch state */
+				end
+				2: begin
+					$display("idle state");
+				end
+			endcase
 
 			// // $display("bridge: %d", cpu_addr);
 			// if (cpu_ctrl[0]) begin

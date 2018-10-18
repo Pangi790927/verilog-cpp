@@ -8,8 +8,8 @@
 
 struct VGA {
 	enum {
-		WRITE			= 0b0000'0000'0000'0001,
-		TEXT_MODE		= 0b0000'0000'0000'0010,	// 1 for text, 0 for graphic
+		HW_WRITE		= 0b0000'0000'0000'0100,
+		TEXT_MODE		= 0b0000'0000'0000'1000,	// 1 for text, 0 for graphic
 	};
 
 	enum {
@@ -57,7 +57,7 @@ struct VGA {
 		chip->rst = 0;
 
 		/* vga specific: */
-		if (chip->ctrl & WRITE) {
+		if (chip->ctrl & HW_WRITE) {
 			if (chip->ctrl & TEXT_MODE) {
 				vmem[chip->phy_addr] = chip->phy_data; // we keep it in memory
 				insert_char(chip->phy_data, chip->phy_addr);
@@ -67,7 +67,7 @@ struct VGA {
 				putpixel(chip->phy_addr %width, chip->phy_addr
 						/ width, chip->phy_data);
 			}
-			chip->ctrl &= ~WRITE;
+			chip->ctrl &= ~HW_WRITE;
 		}
 		/* end vga specific */
 

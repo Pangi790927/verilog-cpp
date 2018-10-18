@@ -7,3 +7,4 @@
 
 `define VGA_WRITE_PIN	0
 `define VGA_READ_PIN	1
+`define VGA_MODE_PIN	3
