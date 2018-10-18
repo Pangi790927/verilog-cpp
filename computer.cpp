@@ -128,15 +128,6 @@ int main(int argc, char const *argv[]) {
 	while (!io_close) {
 		// those inserts here are verry slow, they bring the cpu from 25Mhz to
 		// 0.0005Mhz (500Hz) so don't use them when not needed
-		for (int i = 0; i < 16; i++)
-			for (int j = 0; j < 16; j++)
-				vga.insert_char(((i << 16) & 0xff0000) + ((j << 8) & 0xff00)
-						+ 0, i * VGA::text_col_count + j);
-
-		for (int i = 0; i < 256; i++)
-			vga.insert_char(0x0000'0f'00 + i, i + 16 * VGA::text_col_count);
-
-		vga.insert_char(0x0000'0f'00 + 0, 80 * 25 - 1);
 		x++;
 		mobo.update();
 	}
