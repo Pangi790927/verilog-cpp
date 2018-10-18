@@ -5,5 +5,6 @@
 `define VGA_WRITE	16'b0000_0000_0000_0001
 `define VGA_READ	16'b0000_0000_0000_0010
 
-`define VGA_WRITE_PIN	0
-`define VGA_READ_PIN	1
+`define VGA_WRITE_PIN		0
+`define VGA_READ_PIN		1
+`define VGA_HW_WRITE_PIN 	2
