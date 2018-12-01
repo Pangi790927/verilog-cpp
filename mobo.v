@@ -13,7 +13,7 @@ module mobo(
 
 		output	reg	[31:0]	addr,
 		input		[31:0]	data_in,
-		output	reg	[31:0]	data_out,
+		output	reg	[31:0]	data_out
 	);
 	
 	reg [31:0] state 		= 0;

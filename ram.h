@@ -24,11 +24,11 @@ struct RAM {
 	std::future<void> async_run = std::async([this] {
 		while (!done) {
 			std::lock_guard<std::mutex> guard(mobo.mu);
-			mobo.chip->ram_ctrl_out = 0;
+			mobo.chip->ram_ctrl_from_hw = 0;
 
-			if (mobo.chip->ram_ctrl_in & RAM_IN_OE) {
-				mobo.chip->data_in = mem[mobo.chip->addr];
-				mobo.chip->ram_ctrl_out |= RAM_OUT_ACK;
+			if (mobo.chip->ram_ctrl_to_hw & RAM_IN_OE) {
+				mobo.chip->data_from_hw = mem[mobo.chip->addr];
+				mobo.chip->ram_ctrl_from_hw |= RAM_OUT_ACK;
 				std::cout << mobo.chip->addr << std::endl;
 			}
 		}
