@@ -2,29 +2,29 @@
 #define RAM_H
 
 #include <memory>
-#include "obj_dir/Vram.h"
+#include "mobo.h"
 
 struct RAM {
-	bool present = false;
-	std::shared_ptr<Vram> chip = std::shared_ptr<Vram>(new Vram);
-	
 	std::shared_ptr<char[]> mem = nullptr;
 	size_t size = 0;
+	Mobo &mobo;
 
-	RAM() {}
-	RAM (size_t size) : size(size) {
+	RAM (Mobo &mobo, size_t size) : mobo(mobo), size(size) {
 		mem = std::shared_ptr<char[]>(new char[size]);
 	}
 
-	void update (bool clk) {
-		chip->clk = clk;
-		chip->rst = 0;
-		
-		/* ram specific: */
+	std::atomic<bool> done = false;
+	std::mutex mu;
+	std::future<void> async_run = std::async([this] {
+		while (!done) {
+			std::lock_guard<std::mutex> guard(mobo.mu);
+			// access mobo.chip->pins
+		}
+	});
 
-		/* end ram specific */
-		
-		chip->eval();
+	~RAM() {
+		done = true;
+		async_run.get();
 	}
 };
 

@@ -3,6 +3,7 @@
 
 #include <cxxabi.h>
 #include <string>
+#include <sstream>
 #include <mutex>
 #include <condition_variable>
 
@@ -46,6 +47,14 @@ namespace util {
 			cond.notify_one();
 		}
 	};
+
+	template <typename Type>
+	std::string bin_str (Type a) {
+		std::stringstream ss;
+		for (int i = sizeof(a) * 8 - 1; i >= 0 ; i--)
+			ss << bool(a & (1 << i));
+		return ss.str();
+	}
 }
 
 

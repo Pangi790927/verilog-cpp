@@ -54,7 +54,6 @@ namespace fonts {
 
 	template <size_t char_height, size_t char_width>
 	void load(bool out[][char_height][char_width]) {
-		std::cout << "sal" << std::endl;
 		std::fstream fbitmap;
 		fbitmap.open("fonts/font.bmp" , std::fstream::in | std::fstream::binary);
 
@@ -66,7 +65,6 @@ namespace fonts {
 
 		readBitmapData(fbitmap, header, bmp);
 
-		std::cout << std::endl;
 	    for (int i = 0; i < 256; ++i) {
 	    	for (int k = char_height - 1; k >= 0; k--) {
     			for (int j = 0; j < char_width; ++j) {
@@ -77,17 +75,12 @@ namespace fonts {
     				//std::cout << (int) bmp.data[(i * 8 + j) * 4 + k * bmp.workLineSize + 1];
 
 	    			if (bmp.data[(i * 8 + j) * 4 + k * bmp.workLineSize + 1] == 0) {
-	    				std::cout<<"*";
 	    				out[i][char_height - k - 1][j] = 1;
 	    			} else {
-	    				std::cout<<" ";
 	    				out[i][char_height - k - 1][j] = 0;
 	    			}
 	    		}
-	    		std::cout << std::endl;
     		}
-    		std::cout << std::endl;
-    		std::cout << std::endl;
 	    }
 	}
 }

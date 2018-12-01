@@ -2,9 +2,8 @@
 #define VGA_H
 
 #include <memory>
-#include "obj_dir/Vvga.h"
+// #include "obj_dir/Vvga.h"
 #include "fonts.h"
-
 
 struct VGA {
 	enum {
@@ -32,7 +31,7 @@ struct VGA {
 	};
 
 	bool present = false;
-	std::shared_ptr<Vvga> chip = std::shared_ptr<Vvga>(new Vvga);
+	// std::shared_ptr<Vvga> chip = std::shared_ptr<Vvga>(new Vvga);
 	
 	static const size_t width = 640;
 	static const size_t height = 350;
@@ -53,25 +52,25 @@ struct VGA {
 	}
 
 	void update (bool clk) {
-		chip->clk = clk;
-		chip->rst = 0;
+		// chip->clk = clk;
+		// chip->rst = 0;
 
-		/* vga specific: */
-		if (chip->ctrl & HW_WRITE) {
-			if (chip->ctrl & TEXT_MODE) {
-				vmem[chip->phy_addr] = chip->phy_data; // we keep it in memory
-				insert_char(chip->phy_data, chip->phy_addr);
-			}
-			else {
-				vmem[chip->phy_addr] = chip->data;
-				putpixel(chip->phy_addr %width, chip->phy_addr
-						/ width, chip->phy_data);
-			}
-			chip->ctrl &= ~HW_WRITE;
-		}
-		/* end vga specific */
+		// /* vga specific: */
+		// if (chip->ctrl & HW_WRITE) {
+		// 	if (chip->ctrl & TEXT_MODE) {
+		// 		vmem[chip->phy_addr] = chip->phy_data; // we keep it in memory
+		// 		insert_char(chip->phy_data, chip->phy_addr);
+		// 	}
+		// 	else {
+		// 		vmem[chip->phy_addr] = chip->data;
+		// 		putpixel(chip->phy_addr %width, chip->phy_addr
+		// 				/ width, chip->phy_data);
+		// 	}
+		// 	chip->ctrl &= ~HW_WRITE;
+		// }
+		// /* end vga specific */
 
-		chip->eval();
+		// chip->eval();
 	}
 
 	/* a character will be displayed inside a 20:8 pixels*/
