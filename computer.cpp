@@ -21,8 +21,9 @@ int main(int argc, char const *argv[]) {
 	Verilated::commandArgs(argc, argv);
 
 	float window_scale = 640. / 640;
-	util::SyncCond io_sync;
+	util::SyncCond io_init;
 	util::SyncCond io_close;
+	util::SyncCond use_io_done;
 
 	GlScreen *pgl_screen;
 	std::mutex screen_mu;
@@ -35,7 +36,7 @@ int main(int argc, char const *argv[]) {
 		GlScreen gl_screen(VGA::width, VGA::height);
 		pgl_screen = &gl_screen;
 
-		io_sync.notify();
+		io_init.notify();
 
 		while (display.active) {
 			if(display.handleInput())
@@ -57,7 +58,7 @@ int main(int argc, char const *argv[]) {
 			display.swapBuffers();
 		}
 		io_close.notify();
-		io_sync.wait();
+		use_io_done.wait();
 	});
 
 	std::cout << "----- Start -----" << std::endl;
@@ -65,7 +66,7 @@ int main(int argc, char const *argv[]) {
 		Mobo mobo;
 		RAM ram(mobo, 1 << 20);	// 1Mb ram
 
-		io_sync.wait();
+		io_init.wait();
 		// VGA vga(
 		// 	mobo,
 		// 	put_pixel
@@ -74,7 +75,7 @@ int main(int argc, char const *argv[]) {
 		io_close.wait();
 	}
 
-	io_sync.notify();
+	use_io_done.notify();
 	if (io_thread.joinable())
 		io_thread.join();
 
