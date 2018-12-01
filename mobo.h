@@ -9,6 +9,7 @@ struct Mobo {
 	std::shared_ptr<Vmobo> chip = std::shared_ptr<Vmobo>(new Vmobo);
 	std::atomic<bool> done = false;
 	std::mutex mu;
+
 	std::future<void> async_run = std::async([this] {
 		while (!done) {
 			std::lock_guard<std::mutex> guard(mu);

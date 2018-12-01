@@ -60,33 +60,21 @@ int main(int argc, char const *argv[]) {
 		io_sync.wait();
 	});
 
-	io_sync.wait();
-	auto put_pixel = [&] (int xi, int yi, int color) {
-		std::lock_guard<std::mutex> guard(screen_mu);
-		pgl_screen->put_pixel(color, xi, yi);
-	};
-
-	volatile int x = 0;
-	auto profiler = std::thread([&]{
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-		std::cout << x / 1000'000. << " MHz" << std::endl;
-	});
-
 	std::cout << "----- Start -----" << std::endl;
 	{
 		Mobo mobo;
 		RAM ram(mobo, 1 << 20);	// 1Mb ram
+
+		io_sync.wait();
 		// VGA vga(
 		// 	mobo,
 		// 	put_pixel
 		// );
+		
 		io_close.wait();
 	}
 
 	io_sync.notify();
-
-	if (profiler.joinable())
-		profiler.join();
 	if (io_thread.joinable())
 		io_thread.join();
 
