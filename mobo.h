@@ -11,8 +11,10 @@ struct Mobo {
 	std::mutex mu;
 
 	std::future<void> async_run = std::async([this] {
+		bool clk = true;
 		while (!done) {
 			std::lock_guard<std::mutex> guard(mu);
+			chip->clk = clk = !clk;
 			chip->eval();
 		}
 	});
