@@ -31,6 +31,7 @@ module mobo(
 	reg[31 : 0]					am_out;
 	register am(clk, rst, am_oe, am_we, am_in, am_out);
 	// vga vga(clk, rst, );
+	reg [31 : 0] vari = 0;
 
 	always @(posedge clk or posedge rst) begin
 		if (rst) begin
@@ -46,8 +47,18 @@ module mobo(
 		case(state)
 			`M_STATE_READ: begin
 				ram_ctrl_to_hw[`RAM_READ_PIN] = 1;
-				addr = 0;
+				addr = vari;
 
+				next_state = `M_STATE_WAIT;
+			end
+
+			`M_STATE_WAIT: begin
+				if (ram_ctrl_from_hw[`RAM_READ_DONE]) begin
+					// here ram responded to us
+					$display("(%d) Ram got us: %d", vari, data_from_hw);
+					
+					next_state = `M_STATE_READ;
+				end
 			end
 		endcase
 	end
