@@ -11,6 +11,9 @@ module mobo(
 		input 		[31:0]	ram_ctrl_from_hw,
 		output 	reg [31:0]	ram_ctrl_to_hw,
 
+		input 		[31:0]	vga_ctrl_from_hw,
+		output 	reg [31:0]	vga_ctrl_to_hw,
+
 		output	reg	[31:0]	addr,
 		input		[31:0]	data_from_hw,
 		output	reg	[31:0]	data_to_hw
@@ -32,7 +35,7 @@ module mobo(
 	reg[31 : 0]					am_out;
 	register am(clk, rst, am_oe, am_we, am_in, am_out);
 	// vga vga(clk, rst, );
-	reg [31 : 0] vari = 0;
+	reg [31 : 0] idx = 0;
 
 	always @(posedge clk or posedge rst) begin
 		if (rst) begin
@@ -43,55 +46,64 @@ module mobo(
 			state <= next_state;
 
 			if (ram_state == 1) begin
-				vari += 1;
+				idx += 1;
 			end
 		end
 	end
 
 	always @(*) begin
-		$display("@(*) block start");
+		//$display("(%d) CLC start", idx);
 		ram_state = 0;
 
 		case(state)
 			`M_STATE_WRITE: begin
-				$display("write ram");
+				$display("(%d) write ram", idx);
 
-				ram_ctrl_to_hw[`RAM_READ_PIN] = 1;
-				addr = vari;
-				data_to_hw = vari;
+				if (ram_ctrl_from_hw[`RAM_ACK] == 0) begin //advance to the next state only when the physical chip is done doing its job
+					ram_ctrl_to_hw[`RAM_WRITE_PIN] = 1;
+					addr = idx;
+					data_to_hw = idx;
 
-				next_state = `M_STATE_WAIT_WRITE;
+					next_state = `M_STATE_WAIT_WRITE;
+				end
 			end
 			`M_STATE_WAIT_WRITE: begin
-				$display("waiting for ram to write");
+				$display("(%d) waiting for ram to write", idx);
 
-				if (ram_ctrl_from_hw[`RAM_READ_DONE]) begin
+				if (ram_ctrl_from_hw[`RAM_ACK]) begin
 					// here ram responded to us
-					$display("ACK write, addr %x", addr);
+					ram_ctrl_to_hw = 0;
+					$display("(%d) ACK write, addr %x", idx, addr);
 
 					next_state = `M_STATE_READ;
 				end
 			end
 			`M_STATE_READ: begin
-				$display("ask ram");
+				$display("(%d) ask ram", idx);
 
-				ram_ctrl_to_hw[`RAM_READ_PIN] = 1;
-				addr = vari;
+				if (ram_ctrl_from_hw[`RAM_ACK] == 0) begin //advance to the next state only when the physical chip is done doing its job
+					ram_ctrl_to_hw[`RAM_READ_PIN] = 1;
+					addr = idx;
 
-				next_state = `M_STATE_WAIT_READ;
+					next_state = `M_STATE_WAIT_READ;
+				end
 			end
 
 			`M_STATE_WAIT_READ: begin
-				$display("waiting for ram to deliver, %x", data_from_hw);
-				if (ram_ctrl_from_hw[`RAM_READ_DONE]) begin
+				$display("(%d) waiting for ram respond", idx);
+
+				if (ram_ctrl_from_hw[`RAM_ACK]) begin
 					// here ram responded to us
-					$display("(%d) Ram got us: %d", vari, data_from_hw);
+					ram_ctrl_to_hw = 0;
+					$display("(%d) ACK read: %d", idx, data_from_hw);
 
 					next_state = `M_STATE_WRITE;
 					ram_state = 1;
 				end
 			end
 		endcase
+
+		//$display("(%d) CLC end", idx);
 	end
 
 endmodule
