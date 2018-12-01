@@ -12,8 +12,8 @@ module mobo(
 		output 	reg [31:0]	ram_ctrl_to_hw,
 
 		output	reg	[31:0]	addr,
-		input		[31:0]	data_in,
-		output	reg	[31:0]	data_out
+		input		[31:0]	data_from_hw,
+		output	reg	[31:0]	data_to_hw
 	);
 	
 	reg [31:0] state 		= 0;
