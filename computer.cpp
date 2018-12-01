@@ -3,10 +3,11 @@
 #include <atomic>
 #include <chrono>
 #include <verilated.h>
-#include "obj_dir/Vcpu.h"
 #include "OpenglWindow.h"
 #include "mobo.h"
 #include "gl_screen.h"
+#include "vga.h"
+#include "ram.h"
 
 /* Current simulation time */
 vluint64_t main_time = 0; 
@@ -16,58 +17,12 @@ double sc_time_stamp () {
     return main_time;
 }
 
-// still need:
-// memory
-// hdd
-// keyboard
-// display
-// timer
-
-// optional:
-// mouse
-// network card
-// usb (far away)
-
-// sugested memory work scenario for read:
-// * cpu sets addr, sets control on read and query mem
-// * on next iteration, bridge sees control changed so it sets ram control on
-//   read memory and query
-// * next iteration ram sees query, puts ctrl working and asks phys computer for
-//   ram.
-// * After given memory data and seeing ctrl working freed ram puts the received
-//   data on output and signals by unsetting query flag
-// * bridge finally sees change in ctrl and gives data from ram to cpu and
-//   releases cpu flag
-// * cpu finaly sees his query flag up and removes read flag and continues his
-//   job
-// 
-// work scenario for write is very similar, the difference is that the cpu
-// writes what it wants in ram in it's data register and sets write flag instead
-// of read flag
-//
-// working with vga (THIS IS NO LONGER THE TARGETED BEHAVIOR):
-// * cpu writes in vga memory instad of ram (mmap and bridge will do the job)
-// * after many writes cpu writes with iomap
-// * bridge sees io register changed so it propagates the change to the specific
-//   device (vga in our case)
-// * next iteration vga sees the change and signals phys to draw display by
-//   changing specific control
-// * phys will change display and put the signal on 0
-// * vga will see and it will put 0 on user signal
-// * till now cpu, could pool the bit that he used in iomap to see when screen
-//   was flashed, but it is not necesary
-// 
-// bridge really is useless in iomap, cpu could simply 'talk' to other devices
-// for example in the vga case:
-// * cpu would put address in 
-
 int main(int argc, char const *argv[]) {
 	Verilated::commandArgs(argc, argv);
 
 	float window_scale = 640. / 640;
-	std::atomic<bool> io_close = false;
 	util::SyncCond io_sync;
-	util::SyncCond gl_sync;
+	util::SyncCond io_close;
 
 	GlScreen *pgl_screen;
 	std::mutex screen_mu;
@@ -101,23 +56,15 @@ int main(int argc, char const *argv[]) {
 
 			display.swapBuffers();
 		}
-		io_close = true;
+		io_close.notify();
 		io_sync.wait();
 	});
 
 	io_sync.wait();
-
-	Mobo mobo;
-	CPU cpu;
-	RAM ram(1 << 20);	// 1Mb ram
-	VGA vga([&] (int xi, int yi, int color) {
+	auto put_pixel = [&] (int xi, int yi, int color) {
 		std::lock_guard<std::mutex> guard(screen_mu);
 		pgl_screen->put_pixel(color, xi, yi);
-	});
-
-	mobo.insertCpu(cpu);
-	mobo.insertRam(ram);
-	mobo.initVga(vga);
+	};
 
 	volatile int x = 0;
 	auto profiler = std::thread([&]{
@@ -125,11 +72,15 @@ int main(int argc, char const *argv[]) {
 		std::cout << x / 1000'000. << " MHz" << std::endl;
 	});
 
-	while (!io_close) {
-		// those inserts here are verry slow, they bring the cpu from 25Mhz to
-		// 0.0005Mhz (500Hz) so don't use them when not needed
-		x++;
-		mobo.update();
+	std::cout << "----- Start -----" << std::endl;
+	{
+		Mobo mobo;
+		RAM ram(mobo, 1 << 20);	// 1Mb ram
+		// VGA vga(
+		// 	mobo,
+		// 	put_pixel
+		// );
+		io_close.wait();
 	}
 
 	io_sync.notify();

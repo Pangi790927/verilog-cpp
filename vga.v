@@ -4,8 +4,8 @@
 module vga(
 	// clk, rst - those are required on all devices
 		input				clk,
-		input				rst,
-		
+		input				rst
+
 		input		[31:0]	addr,
 				reg	[31:0]	data,
 		inout 	reg	[15:0]	ctrl,
@@ -50,5 +50,13 @@ module vga(
 	always @(*) begin
 		// here the ram will execute state
 	end
+
+	case (state)
+		`fetch:
+		`fetch + 1:
+		`fetch + 2:
+	endcase
+
+
 
 endmodule
