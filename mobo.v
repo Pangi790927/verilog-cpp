@@ -4,17 +4,16 @@
 `include "register.v"
 
 module mobo(
-	// clk, rst - those are required on all devices
+		// clk, rst - those are required on all devices
 		input				clk,
 		input				rst,
 		
-		input 	reg [31:0]	ram_ctrl_in,
+		input 		[31:0]	ram_ctrl_in,
 		output 	reg [31:0]	ram_ctrl_out,
 
-		input	reg	[31:0]	addr,
-		input	reg	[31:0]	data,
-		output 	reg [31:0]	phy_addr,
-		output	reg	[31:0]	phy_data
+		output	reg	[31:0]	addr,
+		input		[31:0]	data_in,
+		output	reg	[31:0]	data_out,
 	);
 	
 	reg [31:0] state 		= 0;
@@ -45,7 +44,9 @@ module mobo(
 
 	always @(*) begin
 		case(state)
-			`M_STATE_FETCH: begin
+			`M_STATE_READ: begin
+				ram_ctrl_out[`RAM_READ_PIN] = 0;
+				addr = 0;
 				
 			end
 		endcase
