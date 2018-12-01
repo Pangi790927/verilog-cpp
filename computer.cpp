@@ -74,7 +74,7 @@ int main(int argc, char const *argv[]) {
 				pgl_screen->put_pixel(color, xi, yi);
 			}
 		);
-		
+
 		io_close.wait();
 	}
 

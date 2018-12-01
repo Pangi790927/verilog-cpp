@@ -83,6 +83,11 @@ struct VGA {
 		});
 	}
 
+	~VGA() {
+		done = true;
+		async_run.get();
+	}
+
 	/* a character will be displayed inside a 20:8 pixels*/
 	void insert_char (uint color_char, int index) {
 		int x = (index % text_col_count) * char_width;
@@ -91,6 +96,7 @@ struct VGA {
 		put_char_at(color_char, x, y);
 	}
 
+	// color_char: 0x00'bg'fg'ch;
 	void put_char_at (uint color_char, int x, int y) {
 		uint to_print = color_char & 0xff;
 		uint fg_color = colors[(color_char & 0xff00) >> 8];
