@@ -2,8 +2,13 @@
 #define VGA_H
 
 #include <memory>
-// #include "obj_dir/Vvga.h"
+#include "mobo.h"
 #include "fonts.h"
+
+#define VGA_OE 1
+#define VGA_WE 2
+
+#define VGA_ACK 1
 
 struct VGA {
 	enum {
@@ -40,37 +45,42 @@ struct VGA {
 	static const size_t text_row_count = height / char_height;
 	static const size_t text_col_count = width / char_width;
 
+	Mobo &mobo;
 	size_t size = width * height;
 	std::shared_ptr<int[]> vmem = std::shared_ptr<int[]>(new int[size]);
 	std::function<void(int, int, uint)> putpixel;
 
-	VGA() {}
-	VGA (const std::function<void(int, int, uint)>& putpixel)
-	: putpixel(putpixel)
+	std::future<void> async_run;
+	std::atomic<bool> done = false;
+	std::mutex mu;
+
+	VGA (Mobo &mobo, const std::function<void(int, int, uint)>& putpixel)
+	: putpixel(putpixel), mobo(mobo)
 	{
 		fonts::load<char_height, char_width>(char_font);
-	}
 
-	void update (bool clk) {
-		// chip->clk = clk;
-		// chip->rst = 0;
+		async_run = std::async([&] {
+			while (!done) {
+				std::lock_guard<std::mutex> guard(mobo.mu);
+				// while (mobo.lock.test_and_set(std::memory_order_acquire))
+				// 	; // spin
 
-		// /* vga specific: */
-		// if (chip->ctrl & HW_WRITE) {
-		// 	if (chip->ctrl & TEXT_MODE) {
-		// 		vmem[chip->phy_addr] = chip->phy_data; // we keep it in memory
-		// 		insert_char(chip->phy_data, chip->phy_addr);
-		// 	}
-		// 	else {
-		// 		vmem[chip->phy_addr] = chip->data;
-		// 		putpixel(chip->phy_addr %width, chip->phy_addr
-		// 				/ width, chip->phy_data);
-		// 	}
-		// 	chip->ctrl &= ~HW_WRITE;
-		// }
-		// /* end vga specific */
+				mobo.chip->vga_ctrl_from_hw = 0;
 
-		// chip->eval();
+				if (mobo.chip->vga_ctrl_to_hw & VGA_OE) {
+					mobo.chip->data_from_hw = vmem[mobo.chip->addr];
+					mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
+				}
+
+				if (mobo.chip->vga_ctrl_to_hw & VGA_WE) {
+					vmem[mobo.chip->addr] = mobo.chip->data_to_hw; 
+					insert_char(mobo.chip->data_to_hw, mobo.chip->addr);
+					mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
+				}
+
+				// mobo.lock.clear(std::memory_order_release);
+			}
+		});
 	}
 
 	/* a character will be displayed inside a 20:8 pixels*/
