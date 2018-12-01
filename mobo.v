@@ -90,12 +90,33 @@ module mobo(
 			end
 
 			`M_STATE_WAIT_READ: begin
-				$display("(%d) waiting for ram respond", idx);
+				$display("(%d) waiting for RAM respond", idx);
 
 				if (ram_ctrl_from_hw[`RAM_ACK]) begin
 					// here ram responded to us
 					ram_ctrl_to_hw = 0;
 					$display("(%d) ACK read: %d", idx, data_from_hw);
+
+					next_state = `M_STATE_VGA_WRITE;
+					// ram_state = 1;
+				end
+			end
+			`M_STATE_VGA_WRITE: begin
+				$display("(%d) write to VGA", idx);
+				if (vga_ctrl_from_hw[`VGA_ACK] == 0) begin
+					vga_ctrl_to_hw[`VGA_WRITE_PIN] = 1;
+
+					addr = idx;
+					data_to_hw = 32'h000200 + data_from_hw;
+
+					next_state = `M_STATE_VGA_WAIT;
+				end
+			end
+			`M_STATE_VGA_WAIT: begin
+				$display("(%d) waiting for VGA respond", idx);
+				if (vga_ctrl_from_hw[`VGA_ACK]) begin
+					vga_ctrl_to_hw = 0;
+					$display("(%d) Done displaying current char", idx);
 
 					next_state = `M_STATE_WRITE;
 					ram_state = 1;

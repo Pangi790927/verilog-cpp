@@ -67,15 +67,21 @@ struct VGA {
 
 				mobo.chip->vga_ctrl_from_hw = 0;
 
+				std::cout << "VGA loop" << std::endl;
+
+
 				if (mobo.chip->vga_ctrl_to_hw & VGA_OE) {
 					mobo.chip->data_from_hw = vmem[mobo.chip->addr];
 					mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
+
+					std::cout << "Someone is reading" << std::endl;
 				}
 
 				if (mobo.chip->vga_ctrl_to_hw & VGA_WE) {
 					vmem[mobo.chip->addr] = mobo.chip->data_to_hw; 
 					insert_char(mobo.chip->data_to_hw, mobo.chip->addr);
 					mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
+					std::cout << "Someone is writing" << std::endl;
 				}
 
 				// mobo.lock.clear(std::memory_order_release);
