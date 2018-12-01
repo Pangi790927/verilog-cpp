@@ -8,12 +8,12 @@ module mobo(
 		input				clk,
 		input				rst,
 		
-		input 		[31:0]	ram_ctrl_in,
-		output 	reg [31:0]	ram_ctrl_out,
+		input 		[31:0]	ram_ctrl_from_hw,
+		output 	reg [31:0]	ram_ctrl_to_hw,
 
 		output	reg	[31:0]	addr,
-		input		[31:0]	data_in,
-		output	reg	[31:0]	data_out
+		input		[31:0]	data_from_hw,
+		output	reg	[31:0]	data_to_hw
 	);
 	
 	reg [31:0] state 		= 0;
@@ -45,9 +45,9 @@ module mobo(
 	always @(*) begin
 		case(state)
 			`M_STATE_READ: begin
-				ram_ctrl_out[`RAM_READ_PIN] = 0;
+				ram_ctrl_to_hw[`RAM_READ_PIN] = 1;
 				addr = 0;
-				
+
 			end
 		endcase
 	end
