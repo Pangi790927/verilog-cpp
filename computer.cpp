@@ -67,10 +67,13 @@ int main(int argc, char const *argv[]) {
 		RAM ram(mobo, 1 << 20);	// 1Mb ram
 
 		io_init.wait();
-		// VGA vga(
-		// 	mobo,
-		// 	put_pixel
-		// );
+		VGA vga(
+			mobo,
+			[&] (int xi, int yi, int color) {
+				std::lock_guard<std::mutex> guard(screen_mu);
+				pgl_screen->put_pixel(color, xi, yi);
+			}
+		);
 		
 		io_close.wait();
 	}
