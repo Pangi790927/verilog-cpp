@@ -18,6 +18,7 @@ module mobo(
 	
 	reg [31:0] state 		= 0;
 	reg [31:0] next_state 	= 0;
+	reg [31:0] ram_state 	= 0;
 
 	reg [31:0] vga_data		= 0;
 	reg [15:0] vga_addr		= 0;
@@ -40,24 +41,54 @@ module mobo(
 		end
 		else begin
 			state <= next_state;
+
+			if (ram_state == 1) begin
+				vari += 1;
+			end
 		end
 	end
 
 	always @(*) begin
+		$display("@(*) block start");
+		ram_state = 0;
+
 		case(state)
+			`M_STATE_WRITE: begin
+				$display("write ram");
+
+				ram_ctrl_to_hw[`RAM_READ_PIN] = 1;
+				addr = vari;
+				data_to_hw = vari;
+
+				next_state = `M_STATE_WAIT_WRITE;
+			end
+			`M_STATE_WAIT_WRITE: begin
+				$display("waiting for ram to write");
+
+				if (ram_ctrl_from_hw[`RAM_READ_DONE]) begin
+					// here ram responded to us
+					$display("ACK write, addr %x", addr);
+
+					next_state = `M_STATE_READ;
+				end
+			end
 			`M_STATE_READ: begin
+				$display("ask ram");
+
 				ram_ctrl_to_hw[`RAM_READ_PIN] = 1;
 				addr = vari;
 
-				next_state = `M_STATE_WAIT;
+				next_state = `M_STATE_WAIT_READ;
 			end
 
-			`M_STATE_WAIT: begin
+			`M_STATE_WAIT_READ: begin
+				$display("waiting for ram to deliver, %x", data_from_hw);
 				if (ram_ctrl_from_hw[`RAM_READ_DONE]) begin
 					// here ram responded to us
 					$display("(%d) Ram got us: %d", vari, data_from_hw);
-					
-					next_state = `M_STATE_READ;
+
+					next_state = `M_STATE_WRITE;
+					ram_state = 1;
 				end
 			end
 		endcase
