@@ -11,3 +11,4 @@
 `define VGA_MODE_PIN		3
 
 `define RAM_READ_PIN		0
+`define RAM_READ_DONE		0

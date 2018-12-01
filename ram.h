@@ -14,29 +14,35 @@ struct RAM {
 	std::shared_ptr<char[]> mem = nullptr;
 	size_t size = 0;
 
-	RAM (Mobo &mobo, size_t size) : mobo(mobo), size(size) {
-		mem = std::shared_ptr<char[]>(new char[size]);
-	}
-
+	std::future<void> async_run;
 	std::atomic<bool> done = false;
 	std::mutex mu;
 
-	std::future<void> async_run = std::async([this] {
-		while (!done) {
-			std::lock_guard<std::mutex> guard(mobo.mu);
-			mobo.chip->ram_ctrl_from_hw = 0;
+	RAM (Mobo &mobo, size_t size) : mobo(mobo), size(size) {
+		mem = std::shared_ptr<char[]>(new char[size]);
 
-			if (mobo.chip->ram_ctrl_to_hw & RAM_OE) {
-				mobo.chip->data_from_hw = mem[mobo.chip->addr];
-				mobo.chip->ram_ctrl_from_hw |= RAM_ACK;
-			}
+		async_run = std::async([&] {
+			while (!done) {
+				std::lock_guard<std::mutex> guard(mobo.mu);
+				// while (mobo.lock.test_and_set(std::memory_order_acquire))
+				// 	; // spin
 
-			if (mobo.chip->ram_ctrl_to_hw & RAM_WE) {
-				mem[mobo.chip->addr] = mobo.chip->data_to_hw;
-				mobo.chip->ram_ctrl_from_hw |= RAM_ACK;
+				mobo.chip->ram_ctrl_from_hw = 0;
+
+				if (mobo.chip->ram_ctrl_to_hw & RAM_OE) {
+					mobo.chip->data_from_hw = mem[mobo.chip->addr];
+					mobo.chip->ram_ctrl_from_hw |= RAM_ACK;
+				}
+
+				if (mobo.chip->ram_ctrl_to_hw & RAM_WE) {
+					mem[mobo.chip->addr] = mobo.chip->data_to_hw;
+					mobo.chip->ram_ctrl_from_hw |= RAM_ACK;
+				}
+
+				// mobo.lock.clear(std::memory_order_release);
 			}
-		}
-	});
+		});
+	}
 
 	~RAM() {
 		done = true;
