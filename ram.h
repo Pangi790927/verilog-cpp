@@ -29,13 +29,11 @@ struct RAM {
 			if (mobo.chip->ram_ctrl_to_hw & RAM_OE) {
 				mobo.chip->data_from_hw = mem[mobo.chip->addr];
 				mobo.chip->ram_ctrl_from_hw |= RAM_ACK;
-				// std::cout << mobo.chip->addr << std::endl;
 			}
 
 			if (mobo.chip->ram_ctrl_to_hw & RAM_WE) {
 				mem[mobo.chip->addr] = mobo.chip->data_to_hw;
 				mobo.chip->ram_ctrl_from_hw |= RAM_ACK;
-				// std::cout << mobo.chip->addr << " " << mobo.chip->data_to_hw << std::endl;
 			}
 		}
 	});

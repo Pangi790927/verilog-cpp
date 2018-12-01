@@ -47,7 +47,6 @@ module mobo(
 			`M_STATE_READ: begin
 				ram_ctrl_to_hw[`RAM_READ_PIN] = 1;
 				addr = 0;
-
 			end
 		endcase
 	end
