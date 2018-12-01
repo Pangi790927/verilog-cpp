@@ -4,10 +4,10 @@
 #include <memory>
 #include "mobo.h"
 
-#define RAM_IN_OE 1
-#define RAM_IN_WE 2
+#define RAM_OE 1
+#define RAM_WE 2
 
-#define RAM_OUT_ACK 1
+#define RAM_ACK 1
 
 struct RAM {
 	Mobo &mobo;
@@ -26,10 +26,16 @@ struct RAM {
 			std::lock_guard<std::mutex> guard(mobo.mu);
 			mobo.chip->ram_ctrl_from_hw = 0;
 
-			if (mobo.chip->ram_ctrl_to_hw & RAM_IN_OE) {
+			if (mobo.chip->ram_ctrl_to_hw & RAM_OE) {
 				mobo.chip->data_from_hw = mem[mobo.chip->addr];
-				mobo.chip->ram_ctrl_from_hw |= RAM_OUT_ACK;
+				mobo.chip->ram_ctrl_from_hw |= RAM_ACK;
 				std::cout << mobo.chip->addr << std::endl;
+			}
+
+			if (mobo.chip->ram_ctrl_to_hw & RAM_WE) {
+				mem[mobo.chip->addr] = mobo.chip->data_to_hw;
+				mobo.chip->ram_ctrl_from_hw |= RAM_OUT_ACK;
+				std::cout << mobo.chip->addr << " " << mobo.chip->data_to_hw << std::endl;
 			}
 		}
 	});
