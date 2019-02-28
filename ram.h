@@ -23,9 +23,9 @@ struct RAM {
 
 		async_run = std::async([&] {
 			while (!done) {
-				std::lock_guard<std::mutex> guard(mobo.mu);
-				// while (mobo.lock.test_and_set(std::memory_order_acquire))
-				// 	; // spin
+				// std::lock_guard<std::mutex> guard(mobo.mu);
+				while (mobo.lock.test_and_set(std::memory_order_acquire))
+					; // spin
 
 				mobo.chip->ram_ctrl_from_hw = 0;
 
@@ -39,7 +39,7 @@ struct RAM {
 					mobo.chip->ram_ctrl_from_hw |= RAM_ACK;
 				}
 
-				// mobo.lock.clear(std::memory_order_release);
+				mobo.lock.clear(std::memory_order_release);
 			}
 		});
 	}

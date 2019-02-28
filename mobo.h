@@ -3,6 +3,7 @@
 
 #include "utils.h"
 #include <future>
+#include <chrono>
 #include "obj_dir/Vmobo.h"
 
 struct Mobo {
@@ -13,16 +14,25 @@ struct Mobo {
 
 	std::future<void> async_run = std::async([this] {
 		bool clk = true;
-		while (!done) {
-			std::lock_guard<std::mutex> guard(mu);
-			// while (lock.test_and_set(std::memory_order_acquire))  // acquire lock
-			// 	; // spin
+		int i = 0;
+		const clock_t begin_time = clock();
 
+		while (!done) {
+			// std::lock_guard<std::mutex> guard(mu);
+			while (lock.test_and_set(std::memory_order_acquire))  // acquire lock
+				; // spin
+			// uite de asta l-am pus pe asta aici
+			// ar dura mai putin? 
+			// dar parca tot lent e 
+			// si nici nu mai stiu daca mergea ...
+			i++;
 			chip->clk = clk = !clk;
 			chip->eval();
 			
-			// lock.clear(std::memory_order_release);
+			lock.clear(std::memory_order_release);
 		}
+		std::cout << float(i) / (float(clock() - begin_time)
+				/ CLOCKS_PER_SEC) / 1000'000. << "MHz" << std::endl;
 	});
 
 	~Mobo() {

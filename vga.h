@@ -4,6 +4,7 @@
 #include <memory>
 #include "mobo.h"
 #include "fonts.h"
+#include "vga_que.h"
 
 #define VGA_OE 1
 #define VGA_WE 2
@@ -40,6 +41,7 @@ struct VGA {
 	
 	static const size_t width = 640;
 	static const size_t height = 350;
+	static const size_t max_vga_que = 1000;
 	static const size_t char_width = 8;
 	static const size_t char_height = 14;
 	static const size_t text_row_count = height / char_height;
@@ -49,8 +51,10 @@ struct VGA {
 	size_t size = width * height;
 	std::shared_ptr<int[]> vmem = std::shared_ptr<int[]>(new int[size]);
 	std::function<void(int, int, uint)> putpixel;
+	VgaQue<max_vga_que> vga_que;
 
 	std::future<void> async_run;
+	std::future<void> vga_async_run;
 	std::atomic<bool> done = false;
 	std::mutex mu;
 
@@ -59,32 +63,36 @@ struct VGA {
 	{
 		fonts::load<char_height, char_width>(char_font);
 
+		vga_async_run = std::async([&] {
+			while (!done) {
+				if (vga_que.size() > 0) {
+					auto elem = vga_que.pop();
+					insert_char(std::get<0>(elem), std::get<1>(elem));
+				}
+			}
+		});
 		async_run = std::async([&] {
 			while (!done) {
-				std::lock_guard<std::mutex> guard(mobo.mu);
-				// while (mobo.lock.test_and_set(std::memory_order_acquire))
-				// 	; // spin
+				// std::lock_guard<std::mutex> guard(mobo.mu);
+				while (mobo.lock.test_and_set(std::memory_order_acquire))
+					; // spin
 
 				mobo.chip->vga_ctrl_from_hw = 0;
-
-				std::cout << "VGA loop" << std::endl;
-
 
 				if (mobo.chip->vga_ctrl_to_hw & VGA_OE) {
 					mobo.chip->data_from_hw = vmem[mobo.chip->addr];
 					mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
-
-					std::cout << "Someone is reading" << std::endl;
 				}
 
-				if (mobo.chip->vga_ctrl_to_hw & VGA_WE) {
+				if ((mobo.chip->vga_ctrl_to_hw & VGA_WE) && 
+						vga_que.size() < max_vga_que)
+				{
 					vmem[mobo.chip->addr] = mobo.chip->data_to_hw; 
-					insert_char(mobo.chip->data_to_hw, mobo.chip->addr);
+					vga_que.push(mobo.chip->data_to_hw, mobo.chip->addr);
 					mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
-					std::cout << "Someone is writing" << std::endl;
 				}
 
-				// mobo.lock.clear(std::memory_order_release);
+				mobo.lock.clear(std::memory_order_release);
 			}
 		});
 	}
@@ -92,6 +100,7 @@ struct VGA {
 	~VGA() {
 		done = true;
 		async_run.get();
+		vga_async_run.get();
 	}
 
 	/* a character will be displayed inside a 20:8 pixels*/
@@ -156,5 +165,59 @@ struct VGA {
 		0x00'ff'ff'ff  // white
 	};
 };
+
+// h								t
+// ---------------------------------
+//                    p
+
+// struct VgaQue {
+// 	atomic<int> tail;
+// 	atomic<int> head;
+// 	atomic<int> len;
+// 	std::vector<ceva> vec;
+
+// 	VgaQue() {
+// 		tail = 0;
+// 		head = 0;
+// 	}
+
+// 	void push(uint color_char, int index) {
+// 		vec[tail] = pixel(color_char, index);
+// 		tail = (tail + 1) % max_size;
+// 		len = len + 1;
+// 	}
+
+// 	pixel pop() {
+// 		pixel aux = vec[head];
+// 		head = (head + 1) % max_size;
+// 		len = len - 1;
+// 		return aux;
+// 	}
+
+// 	size_t size() {
+// 		return len;
+// 	}
+// }
+
+// {
+// 	// vga
+// 	if (size() > 0)
+// 		new_pixel = pop();
+// }
+
+// {
+// 	// mobo
+// 	{
+// 		// cpu
+// 		if (cpu wants push)
+// 			signal vga want push
+// 			wait vga respond
+// 	}
+// 	if (step % (20 + size() / 10) == 0 && size() < max_size / 2) {
+// 		// vga other side
+// 		if (cpu wants push)
+// 			push(pixel);
+// 	}
+// }
 
 #endif

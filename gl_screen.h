@@ -45,9 +45,11 @@ struct GlScreen {
 		uint8_t g = (((0x0000ff00 & color) >> 8 ) & 0xff);
 		uint8_t b = (((0x00ff0000 & color) >> 16) & 0xff);
 
-		screen[((height - y) * width + x) * 3 + 0] = r;
-		screen[((height - y) * width + x) * 3 + 1] = g;
-		screen[((height - y) * width + x) * 3 + 2] = b;
+		if (!((height - y) * width + x > width * height || y > height || x < 0)) {
+			screen[((height - y) * width + x) * 3 + 0] = r;
+			screen[((height - y) * width + x) * 3 + 1] = g;
+			screen[((height - y) * width + x) * 3 + 2] = b;
+		}
 
 		updated = true;
 	}
