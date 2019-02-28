@@ -59,39 +59,47 @@ struct VGA {
 	{
 		fonts::load<char_height, char_width>(char_font);
 
-		async_run = std::async([&] {
+		/*async_run = std::async([&] {
 			while (!done) {
 				std::lock_guard<std::mutex> guard(mobo.mu);
 				// while (mobo.lock.test_and_set(std::memory_order_acquire))
 				// 	; // spin
 
-				mobo.chip->vga_ctrl_from_hw = 0;
-
-				std::cout << "VGA loop" << std::endl;
-
-
-				if (mobo.chip->vga_ctrl_to_hw & VGA_OE) {
-					mobo.chip->data_from_hw = vmem[mobo.chip->addr];
-					mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
-
-					std::cout << "Someone is reading" << std::endl;
-				}
-
-				if (mobo.chip->vga_ctrl_to_hw & VGA_WE) {
-					vmem[mobo.chip->addr] = mobo.chip->data_to_hw; 
-					insert_char(mobo.chip->data_to_hw, mobo.chip->addr);
-					mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
-					std::cout << "Someone is writing" << std::endl;
-				}
+				
 
 				// mobo.lock.clear(std::memory_order_release);
 			}
-		});
+		});*/
 	}
 
 	~VGA() {
 		done = true;
 		async_run.get();
+	}
+
+	void refresh() {
+		if (done) {
+			return;
+		}
+
+		mobo.chip->vga_ctrl_from_hw = 0;
+
+		//std::cout << "VGA loop" << std::endl;
+
+
+		if (mobo.chip->vga_ctrl_to_hw & VGA_OE) {
+			mobo.chip->data_from_hw = vmem[mobo.chip->addr];
+			mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
+
+			//std::cout << "Someone is reading" << std::endl;
+		}
+
+		if (mobo.chip->vga_ctrl_to_hw & VGA_WE) {
+			vmem[mobo.chip->addr] = mobo.chip->data_to_hw; 
+			insert_char(mobo.chip->data_to_hw, mobo.chip->addr);
+			mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
+			//std::cout << "Someone is writing" << std::endl;
+		}
 	}
 
 	/* a character will be displayed inside a 20:8 pixels*/
