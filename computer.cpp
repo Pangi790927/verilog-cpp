@@ -28,6 +28,8 @@ int main(int argc, char const *argv[]) {
 	GlScreen *pgl_screen;
 	std::mutex screen_mu;
 
+	bool done = false;
+
 	auto io_thread = std::thread([&](){
 		OpenglWindow display(VGA::width * window_scale,
 				VGA::height * window_scale, "VGA Display");
@@ -57,6 +59,9 @@ int main(int argc, char const *argv[]) {
 
 			display.swapBuffers();
 		}
+
+		done = true;
+
 		io_close.notify();
 		use_io_done.wait();
 	});
@@ -75,8 +80,28 @@ int main(int argc, char const *argv[]) {
 			}
 		);
 
+		int tick = 0;
+		const clock_t begin_time = clock();
+		
+		while (!done) {
+			mobo.refresh();
+			if (tick % 3 == 0) {
+				ram.refresh();
+			}
+
+			if (tick % 20 == 0) {
+				vga.refresh();
+			}
+
+			tick++;
+		}
+
+		std::cout << float(tick) / (float(clock() - begin_time)
+				/ CLOCKS_PER_SEC) / 1000'000. << "MHz" << std::endl;
+
 		io_close.wait();
 	}
+	std::cout << "closing ..." << std::endl;
 
 	use_io_done.notify();
 	if (io_thread.joinable())
@@ -84,3 +109,88 @@ int main(int argc, char const *argv[]) {
 
 	return 0;
 }
+
+
+// // uite
+// int i = 0;
+// while (true) {
+// 	cpu.eval()
+// 	if (i % 10 == 0) {
+// 		ram.eval();
+// 	}
+// 	if (i % 1000 == 0) {
+// 		vga.eval();
+// 	}
+// 	i++
+// }
+
+// problema e ca vga mananca mult timp
+
+// adica ar fi ceva de genu
+
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// ram
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// ram
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// ram
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// ram
+// ...
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu
+// cpu 0.1ms
+// cpu 0.1ms
+// ram 2ms
+// vga 100ms
+
+// le-am luat din burta
+// dar ceva de genu?
+
+// si problema e ca 100ms alea cpu-ul 
+// dar si cu arhitectura asta, dureaza mult sa luam mutexuri
+// ca vrem sa avem mhz pe cpu
+// si mutexurile sunt foarte lente
+// sunt asemanatoare cu printf
