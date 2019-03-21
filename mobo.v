@@ -43,7 +43,7 @@ module mobo(
 	always @(posedge clk or posedge rst) begin
 		if (rst) begin
 			// reset
-			
+			state <= 0;
 		end
 		else begin
 			state <= next_state;
