@@ -2,6 +2,7 @@
 `include "mobo_states.v"
 
 `include "verilog_src/register.v"
+`include "verilog_src/alu.v"
 
 module mobo(
 		// clk, rst - those are required on all devices
