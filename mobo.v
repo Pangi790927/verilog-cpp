@@ -1,7 +1,7 @@
 `include "control_pins.v"
 `include "mobo_states.v"
 
-`include "register.v"
+`include "verilog_include/register.v"
 
 module mobo(
 		// clk, rst - those are required on all devices
