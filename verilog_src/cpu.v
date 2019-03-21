@@ -1,16 +1,16 @@
-`include "alu.v"
+`include "verilog_src/alu.v"
 
 module cpu(
 		input	clk,
 		input	rst,
-		output	[width-1 : 0] mobo_ctrl,
-		input	[width-1 : 0] mobo_stat,
-		output	[width-1 : 0] addr,
-		output	[width-1 : 0] data_out,
-		input	[width-1 : 0] data_in
+		output	[word_width-1 : 0] mobo_ctrl,
+		input	[word_width-1 : 0] mobo_stat,
+		output	[word_width-1 : 0] addr,
+		output	[word_width-1 : 0] data_out,
+		input	[word_width-1 : 0] data_in
 	);
 
-	parameter width = 32;
+	parameter word_width = 32;
 
 	// instantiate T1 register and related connections
 	wire                        t1_oe;

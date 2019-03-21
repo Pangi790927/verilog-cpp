@@ -38,16 +38,19 @@ reg                         p, s, z, o, c;
 always @(*) begin
     case(opcode)
         `ADC: begin
+            /* verilator lint_off WIDTH */
             {c, result} = in1 + in2 + carry;
             o = (in1[width-1] == in2[width-1]) && (in1[width-1] != result[width-1]);
         end
 
         `SBB1: begin
+            /* verilator lint_off WIDTH */
             {c, result} = in1 - in2 - carry;
             o = (in1[width-1] != in2[width-1]) && (in1[width-1] != result[width-1]);
         end
 
         `SBB2: begin
+            /* verilator lint_off WIDTH */
             {c, result} = in2 - in1 - carry;
             o = (in2[width-1] != in1[width-1]) && (in2[width-1] != result[width-1]);
         end

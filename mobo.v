@@ -10,32 +10,35 @@ module mobo(
 		input				rst,
 
 		/* The connected ram */
-		input 		[31:0]	ram_stat,
-		output 	reg [31:0]	ram_ctrl,
+		input 		[word_width-1:0]	ram_stat,
+		output 	reg [word_width-1:0]	ram_ctrl,
 
 		/* The connected vga */
-		input 		[31:0]	vga_stat,
-		output 	reg [31:0]	vga_ctrl,
+		input 		[word_width-1:0]	vga_stat,
+		output 	reg [word_width-1:0]	vga_ctrl,
 
 		/* Data buss for devices */
-		output	reg	[31:0]	addr,
-		input		[31:0]	data_in,
-		output	reg	[31:0]	data_out
+		output	reg	[word_width-1:0]	addr,
+		input		[word_width-1:0]	data_in,
+		output	reg	[word_width-1:0]	data_out
 	);
 
+	parameter word_width = 32;
+
 	/* Intern state, usefull for waiting for device response */
-	reg [31:0] state 		= 0;
-	reg [31:0] next_state 	= 0;
+	reg [word_width-1:0] state 		= 0;
+	reg [word_width-1:0] next_state = 0;
+	reg [word_width-1:0] ram_state	= 0;
 
 	/* Those are from cpu perspective */
-	wire [width-1 : 0] mobo_ctrl;
-	reg [width-1 : 0] mobo_stat = 0;
-	wire [width-1 : 0] addr;
-	wire [width-1 : 0] data_out;
-	reg [width-1 : 0] data_in = 0;
+	wire [word_width-1 : 0] mobo_ctrl;
+	reg [word_width-1 : 0] mobo_stat = 0;
+	wire [word_width-1 : 0] addr;
+	wire [word_width-1 : 0] cpu_data_out;
+	reg [word_width-1 : 0] cpu_data_in = 0;
 
 	/* The connected cpu */
-	cpu(clk, rst, mobo_ctrl, mobo_stat, addr, data_out, data_in);
+	cpu cpu(clk, rst, mobo_ctrl, mobo_stat, addr, cpu_data_out, cpu_data_in);
 
 	always @(posedge clk or posedge rst) begin
 		if (rst) begin
@@ -74,7 +77,7 @@ module mobo(
 				if (ram_stat[`RAM_ACK] == 0) begin //advance to the next state only when the physical chip is done doing its job
 					ram_ctrl[`RAM_WRITE_PIN] = 1;
 					addr = idx;
-					data_out = idx;
+					cpu_data_out = idx;
 
 					next_state = `M_STATE_WAIT_WRITE;
 				end
@@ -119,7 +122,7 @@ module mobo(
 					vga_ctrl[`VGA_WRITE_PIN] = 1;
 
 					addr = idx;
-					data_out = 32'h000200 + data_in;
+					cpu_data_out = 32'h000200 + data_in;
 
 					next_state = `M_STATE_VGA_WAIT;
 				end
