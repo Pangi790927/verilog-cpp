@@ -8,15 +8,17 @@ module mobo(
 		input				clk,
 		input				rst,
 		
-		input 		[31:0]	ram_ctrl_from_hw,
-		output 	reg [31:0]	ram_ctrl_to_hw,
+		input 		[31:0]	ram_stat,
+		output 	reg [31:0]	ram_ctrl,
 
-		input 		[31:0]	vga_ctrl_from_hw,
-		output 	reg [31:0]	vga_ctrl_to_hw,
+		// ctrl, statu
+		input 		[31:0]	vga_stat,
+		output 	reg [31:0]	vga_ctrl,
 
+		// asta ara busul
 		output	reg	[31:0]	addr,
-		input		[31:0]	data_from_hw,
-		output	reg	[31:0]	data_to_hw
+		input		[31:0]	data_in,
+		output	reg	[31:0]	data_out
 	);
 	
 	reg [31:0] state 		= 0;
@@ -60,10 +62,10 @@ module mobo(
 			`M_STATE_WRITE: begin
 				// $display("(%d) write ram", idx);
 
-				if (ram_ctrl_from_hw[`RAM_ACK] == 0) begin //advance to the next state only when the physical chip is done doing its job
-					ram_ctrl_to_hw[`RAM_WRITE_PIN] = 1;
+				if (ram_stat[`RAM_ACK] == 0) begin //advance to the next state only when the physical chip is done doing its job
+					ram_ctrl[`RAM_WRITE_PIN] = 1;
 					addr = idx;
-					data_to_hw = idx;
+					data_out = idx;
 
 					next_state = `M_STATE_WAIT_WRITE;
 				end
@@ -71,9 +73,9 @@ module mobo(
 			`M_STATE_WAIT_WRITE: begin
 				// $display("(%d) waiting for ram to write", idx);
 
-				if (ram_ctrl_from_hw[`RAM_ACK]) begin
+				if (ram_stat[`RAM_ACK]) begin
 					// here ram responded to us
-					ram_ctrl_to_hw = 0;
+					ram_ctrl = 0;
 					// $display("(%d) ACK write, addr %x", idx, addr);
 
 					next_state = `M_STATE_READ;
@@ -82,8 +84,8 @@ module mobo(
 			`M_STATE_READ: begin
 				// $display("(%d) ask ram", idx);
 
-				if (ram_ctrl_from_hw[`RAM_ACK] == 0) begin //advance to the next state only when the physical chip is done doing its job
-					ram_ctrl_to_hw[`RAM_READ_PIN] = 1;
+				if (ram_stat[`RAM_ACK] == 0) begin //advance to the next state only when the physical chip is done doing its job
+					ram_ctrl[`RAM_READ_PIN] = 1;
 					addr = idx;
 
 					next_state = `M_STATE_WAIT_READ;
@@ -93,9 +95,9 @@ module mobo(
 			`M_STATE_WAIT_READ: begin
 				// $display("(%d) waiting for RAM respond", idx);
 
-				if (ram_ctrl_from_hw[`RAM_ACK]) begin
+				if (ram_stat[`RAM_ACK]) begin
 					// here ram responded to us
-					ram_ctrl_to_hw = 0;
+					ram_ctrl = 0;
 					// $display("(%d) ACK read: %d", idx, data_from_hw);
 
 					next_state = `M_STATE_VGA_WRITE;
@@ -103,21 +105,21 @@ module mobo(
 				end
 			end
 			`M_STATE_VGA_WRITE: begin
-				$display("(%d) write to VGA", idx);
-				if (vga_ctrl_from_hw[`VGA_ACK] == 0) begin
-					vga_ctrl_to_hw[`VGA_WRITE_PIN] = 1;
+				// $display("(%d) write to VGA", idx);
+				if (vga_stat[`VGA_ACK] == 0) begin
+					vga_ctrl[`VGA_WRITE_PIN] = 1;
 
 					addr = idx;
-					data_to_hw = 32'h000200 + data_from_hw;
+					data_out = 32'h000200 + data_in;
 
 					next_state = `M_STATE_VGA_WAIT;
 				end
 			end
 			`M_STATE_VGA_WAIT: begin
-				$display("(%d) waiting for VGA respond", idx);
-				if (vga_ctrl_from_hw[`VGA_ACK] && idx < 2000) begin
-					vga_ctrl_to_hw = 0;
-					$display("(%d) Done displaying current char", idx);
+				// $display("(%d) waiting for VGA respond", idx);
+				if (vga_stat[`VGA_ACK] && idx < 2000) begin
+					vga_ctrl = 0;
+					// $display("(%d) Done displaying current char", idx);
 
 					next_state = `M_STATE_WRITE;
 					ram_state = 1;

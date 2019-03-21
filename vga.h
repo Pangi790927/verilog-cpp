@@ -82,19 +82,19 @@ struct VGA {
 			return;
 		}
 
-		mobo.chip->vga_ctrl_from_hw = 0;
+		mobo.chip->vga_stat = 0;
 
-		if (mobo.chip->vga_ctrl_to_hw & VGA_OE) {
-			mobo.chip->data_from_hw = vmem[mobo.chip->addr];
-			mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
+		if (mobo.chip->vga_ctrl & VGA_OE) {
+			mobo.chip->data_in = vmem[mobo.chip->addr];
+			mobo.chip->vga_stat |= VGA_ACK;
 		}
 
-		if ((mobo.chip->vga_ctrl_to_hw & VGA_WE) && 
+		if ((mobo.chip->vga_ctrl & VGA_WE) && 
 				vga_que.size() < max_vga_que)
 		{
-			vmem[mobo.chip->addr] = mobo.chip->data_to_hw; 
-			vga_que.push(mobo.chip->data_to_hw, mobo.chip->addr);
-			mobo.chip->vga_ctrl_from_hw |= VGA_ACK;
+			vmem[mobo.chip->addr] = mobo.chip->data_out; 
+			vga_que.push(mobo.chip->data_out, mobo.chip->addr);
+			mobo.chip->vga_stat |= VGA_ACK;
 		}
 	}
 

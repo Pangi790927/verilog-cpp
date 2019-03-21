@@ -34,16 +34,16 @@ struct RAM {
 	}
 
 	void refresh() {
-		mobo.chip->ram_ctrl_from_hw = 0;
+		mobo.chip->ram_stat = 0;
 
-		if (mobo.chip->ram_ctrl_to_hw & RAM_OE) {
-			mobo.chip->data_from_hw = mem[mobo.chip->addr];
-			mobo.chip->ram_ctrl_from_hw |= RAM_ACK;
+		if (mobo.chip->ram_ctrl & RAM_OE) {
+			mobo.chip->data_in = mem[mobo.chip->addr];
+			mobo.chip->ram_stat |= RAM_ACK;
 		}
 
-		if (mobo.chip->ram_ctrl_to_hw & RAM_WE) {
-			mem[mobo.chip->addr] = mobo.chip->data_to_hw;
-			mobo.chip->ram_ctrl_from_hw |= RAM_ACK;
+		if (mobo.chip->ram_ctrl & RAM_WE) {
+			mem[mobo.chip->addr] = mobo.chip->data_out;
+			mobo.chip->ram_stat |= RAM_ACK;
 		}
 
 	}
