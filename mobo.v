@@ -2,42 +2,51 @@
 `include "mobo_states.v"
 
 `include "verilog_src/register.v"
+`include "verilog_src/cpu.v"
 
 module mobo(
-		// clk, rst - those are required on all devices
+		/* clk, rst - those are required on all devices */
 		input				clk,
 		input				rst,
-		
+
+		/* The connected ram */
 		input 		[31:0]	ram_stat,
 		output 	reg [31:0]	ram_ctrl,
 
-		// ctrl, statu
+		/* The connected vga */
 		input 		[31:0]	vga_stat,
 		output 	reg [31:0]	vga_ctrl,
 
-		// asta ara busul
+		/* Data buss for devices */
 		output	reg	[31:0]	addr,
 		input		[31:0]	data_in,
 		output	reg	[31:0]	data_out
 	);
-	
+
+	/* Intern state, usefull for waiting for device response */
 	reg [31:0] state 		= 0;
 	reg [31:0] next_state 	= 0;
-	reg [31:0] ram_state 	= 0;
-	// var2 = 0;
 
-	reg [31:0] vga_data		= 0;
-	reg [15:0] vga_addr		= 0;
-	reg vga_oe 				= 0;
-	reg vga_we 				= 0;
+	/* Those are from cpu perspective */
+	wire [width-1 : 0] mobo_ctrl;
+	reg [width-1 : 0] mobo_stat = 0;
+	wire [width-1 : 0] addr;
+	wire [width-1 : 0] data_out;
+	reg [width-1 : 0] data_in = 0;
+
+	/* The connected cpu */
+	cpu(clk, rst, mobo_ctrl, mobo_stat, addr, data_out, data_in);
+
+	always @(posedge clk or posedge rst) begin
+		if (rst) begin
+			state <= 0;
+		end
+		else begin
+			state <= next_state;
+		end
+	end
 
 	// instantiate AM register and related connections
-	reg							am_oe;
-	reg							am_we;
-	reg[31 : 0]					am_in;
-	reg[31 : 0]					am_out;
-	register am(clk, rst, am_oe, am_we, am_in, am_out);
-	// vga vga(clk, rst, );
 	reg [31 : 0] idx = 0;
 
 	always @(posedge clk or posedge rst) begin

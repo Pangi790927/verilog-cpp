@@ -1,22 +1,6 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date:    19:24:24 11/26/2011
-// Design Name:
-// Module Name:    register
-// Project Name:
-// Target Devices:
-// Tool versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
+// * From AC Lab in UPB
 //////////////////////////////////////////////////////////////////////////////////
 module register(
         clk,
