@@ -2,7 +2,6 @@
 `include "mobo_states.v"
 
 `include "verilog_src/register.v"
-`include "verilog_src/alu.v"
 `include "verilog_src/cpu.v"
 
 module mobo(
