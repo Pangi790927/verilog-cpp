@@ -39,6 +39,8 @@ module cpu(
 	wire[4 : 0]                 alu_flags;
 	alu #(word_width, 5) alu(alu_oe, alu_opcode, t1_out, t2_out, alu_carry, alu_out, alu_flags);
 
+	wire dbg_enable;
+
 	// FSM - sequential part
 	always @(posedge clk) begin
 		state <= `C_STATE_RESET;
@@ -46,9 +48,12 @@ module cpu(
 		if(!rst)
 			state <= next_state;
 
-		if (state != `C_STATE_HLT) begin
-			$display("state; %x t2 content: %d\n", state, t2_out);
-			$display("state; %x t1 content: %d\n", state, t1_out);
+		if (dbg_enable) begin
+			$display("----------------- DEBUG ------------------");
+			$display("state: %x ", state);
+			$display("t1 content: %d", t1_out);
+			$display("t2 content: %d", t2_out);
+			$display("------------------------------------------");
 		end
 	end
 
@@ -59,6 +64,8 @@ module cpu(
 
 		t2_we = 0;
 		t2_oe = 0;
+
+		dbg_enable = 0;
 
 		case(state)
 			`C_STATE_RESET: begin
@@ -79,10 +86,15 @@ module cpu(
 				t1_oe = 1;
 				t2_oe = 1;
 
+				dbg_enable = 1;
 				next_state = `C_STATE_TEST + 2;
 			end
 
 			`C_STATE_TEST + 2: begin
+				t1_oe = 1;
+				t2_oe = 1;
+
+				dbg_enable = 1;
 				next_state = `C_STATE_HLT;
 			end
 
@@ -92,3 +104,12 @@ module cpu(
 		endcase
 	end
 endmodule
+
+/*
+	Ce vrem sa facem:
+		sa scriem din cpu in vga
+	Cum:
+
+
+
+*/
