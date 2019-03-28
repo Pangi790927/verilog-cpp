@@ -51,7 +51,7 @@ module cpu(
 		if (dbg_enable) begin
 			$display("------------------ DEBUG ------------------");
 			$display("state: %x %s + %d", state,
-					get_str_state(state), (state & 'hf));
+					cpu_str_state(state), (state & 'hf));
 			$display("t1 content: %d", t1_out);
 			$display("t2 content: %d", t2_out);
 			$display("-------------------------------------------");

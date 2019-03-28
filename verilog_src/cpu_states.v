@@ -2,7 +2,7 @@
 `define C_STATE_TEST			'h10 // load instruction to instruction register
 `define C_STATE_HLT				'h20 // load instruction to instruction register
 
-function string get_str_state(int state);
+function string cpu_str_state(int state);
 	$display("state: %x", state & ~'hf);
 	case (state & ~'hf)
 		`C_STATE_RESET:	return "C_STATE_RESET";
