@@ -30,20 +30,33 @@ module mobo(
 	);
 
 	parameter word_width = 32;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5ac38c30b53baa680a73c6e69c8c9f68f452d8e5
 	/* Intern state, usefull for waiting for device response */
-	reg [31:0] state 		= 0;
-	reg [31:0] next_state 	= 0;
+	reg [word_width-1:0] state 		= 0;
+	reg [word_width-1:0] next_state = 0;
+	reg [word_width-1:0] ram_state	= 0;
 
 	/* Those are from cpu perspective */
 	wire [word_width-1 : 0] mobo_ctrl;
 	reg [word_width-1 : 0] mobo_stat = 0;
+<<<<<<< HEAD
 	wire [word_width-1 : 0] cpu_addr;
+=======
+	wire [word_width-1 : 0] addr;
+>>>>>>> 5ac38c30b53baa680a73c6e69c8c9f68f452d8e5
 	wire [word_width-1 : 0] cpu_data_out;
 	reg [word_width-1 : 0] cpu_data_in = 0;
 
 	/* The connected cpu */
+<<<<<<< HEAD
 	cpu cpu(clk, rst, mobo_ctrl, mobo_stat,
 			cpu_addr, cpu_data_out, cpu_data_in);
+=======
+	cpu cpu(clk, rst, mobo_ctrl, mobo_stat, addr, cpu_data_out, cpu_data_in);
+>>>>>>> 5ac38c30b53baa680a73c6e69c8c9f68f452d8e5
 
 	wire [word_width-1 : 0] transl_addr;
 	wire [word_width-1 : 0] transl_state;
@@ -101,7 +114,6 @@ module mobo(
 					next_state = `MOBO_IDLE;
 				end
 			end
-
 		endcase
 	end
 

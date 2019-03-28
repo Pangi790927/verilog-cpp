@@ -28,7 +28,7 @@ module register(
         disp_out
     );
 
-parameter width = 16;
+parameter width = 32;
 
 input               clk;
 input               rst;
