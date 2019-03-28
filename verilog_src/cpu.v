@@ -1,4 +1,5 @@
 `include "verilog_src/alu.v"
+`include "verilog_src/register.v"
 `include "verilog_src/cpu_states.v"
 
 module cpu(
@@ -70,17 +71,18 @@ module cpu(
 			end
 
 			`C_STATE_TEST + 1: begin
-				t1_oe = 1;
-				t2_oe = 1;
+				if (state != next_state) begin	
+					t1_oe = 1;
+					t2_oe = 1;
+				end
 
-				res = t1_out;
 				//$display("t2 content: %d\n", t2_out);
 			
 				next_state = `C_STATE_TEST + 2;
 			end
 
 			`C_STATE_TEST + 2: begin
-				$display("t1 content: %d\n", res);
+				$display("t1 content: %d\n", t1_out);
 
 				next_state = `C_STATE_TEST + 3;
 			end
