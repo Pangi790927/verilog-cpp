@@ -1,23 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
-//
-// Create Date:    19:38:04 11/26/2011
-// Design Name:
-// Module Name:    bus
-// Project Name:
-// Target Devices:
-// Tool versions:
-// Description:
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
 module bus(
         alu_in,
         ram_in,
@@ -39,28 +20,28 @@ module bus(
         disp_out
     );
 
-parameter width = 16;
+parameter word_width = 32;
 
-input [width-1 : 0] alu_in;
-input [width-1 : 0] ram_in;
-input [width-1 : 0] io_in;
-input [width-1 : 0] regs_in;
-input [width-1 : 0] cp_in;
-input [width-1 : 0] ind_in;
-input [width-1 : 0] offset_in;
-output[width-1 : 0] am_out;
-output[width-1 : 0] aie_out;
-output[width-1 : 0] t1_out;
-output[width-1 : 0] t2_out;
-output[width-1 : 0] ri_out;
-output[width-1 : 0] ram_out;
-output[width-1 : 0] io_out;
-output[width-1 : 0] regs_out;
-output[width-1 : 0] cp_out;
-output[width-1 : 0] ind_out;
-output[width-1 : 0] disp_out;
+input [word_width-1 : 0] alu_in;
+input [word_width-1 : 0] ram_in;
+input [word_width-1 : 0] io_in;
+input [word_width-1 : 0] regs_in;
+input [word_width-1 : 0] cp_in;
+input [word_width-1 : 0] ind_in;
+input [word_width-1 : 0] offset_in;
+output[word_width-1 : 0] am_out;
+output[word_width-1 : 0] aie_out;
+output[word_width-1 : 0] t1_out;
+output[word_width-1 : 0] t2_out;
+output[word_width-1 : 0] ri_out;
+output[word_width-1 : 0] ram_out;
+output[word_width-1 : 0] io_out;
+output[word_width-1 : 0] regs_out;
+output[word_width-1 : 0] cp_out;
+output[word_width-1 : 0] ind_out;
+output[word_width-1 : 0] disp_out;
 
-wire [width-1 : 0]  bus;
+wire [word_width-1 : 0]  bus;
 
 assign bus = alu_in | ram_in | io_in | regs_in | cp_in | ind_in | offset_in;
 

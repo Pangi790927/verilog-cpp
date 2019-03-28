@@ -11,16 +11,16 @@ module register(
         out
     );
 
-parameter width = 32;
+parameter word_width = 32;
 
 input               clk;
 input               rst;
 input               oe;
 input               we;
-input [width-1 : 0] in;
-output[width-1 : 0] out;
+input [word_width-1 : 0] in;
+output[word_width-1 : 0] out;
 
-reg [width-1 : 0]   data;
+reg [word_width-1 : 0]   data;
 
 always @(posedge clk) begin
     if(rst)
