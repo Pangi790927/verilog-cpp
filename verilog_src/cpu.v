@@ -45,6 +45,11 @@ module cpu(
 
 		if(!rst)
 			state <= next_state;
+
+		if (state != `C_STATE_HLT) begin
+			$display("state; %x t2 content: %d\n", state, t2_out);
+			$display("state; %x t1 content: %d\n", state, t1_out);
+		end
 	end
 
 	// FSM - combinational part
@@ -71,20 +76,18 @@ module cpu(
 			end
 
 			`C_STATE_TEST + 1: begin
-				if (state != next_state) begin	
-					t1_oe = 1;
-					t2_oe = 1;
-				end
+				t1_oe = 1;
+				t2_oe = 1;
 
-				//$display("t2 content: %d\n", t2_out);
-			
 				next_state = `C_STATE_TEST + 2;
 			end
 
 			`C_STATE_TEST + 2: begin
-				$display("t1 content: %d\n", t1_out);
+				next_state = `C_STATE_HLT;
+			end
 
-				next_state = `C_STATE_TEST + 3;
+			`C_STATE_HLT: begin
+				next_state = `C_STATE_HLT;
 			end
 		endcase
 	end
