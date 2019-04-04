@@ -10,8 +10,8 @@ module cpu(
 		output	reg	[word_width-1 : 0] mobo_ctrl,
 		input		[word_width-1 : 0] mobo_stat,
 		output		[word_width-1 : 0] addr,
-		output		[word_width-1 : 0] data_out,
-		input		[word_width-1 : 0] data_in
+		output		[word_width-1 : 0] mobodat_out,
+		input		[word_width-1 : 0] mobodat_in
 	);
 
 	parameter word_width = 32;
@@ -51,16 +51,17 @@ module cpu(
 	wire 						mobodat_out_we;
 	wire [word_width-1 : 0]		mobodat_out_in;
 	register mobodata_out_reg(clk, rst, mobodat_out_oe, mobodat_out_we,
-			mobodat_out_in, data_out);
+			mobodat_out_in, mobodat_out);
 	/* cpu -> we -> mobodat_out -> oe -> mobo */
 
 	wire 						mobodat_in_oe;
 	wire 						mobodat_in_we;
 	wire [word_width-1 : 0]		mobodat_in_out;
 	register mobodat_in_reg(clk, rst, mobodat_in_oe, mobodat_in_we,
-				data_in, mobodat_in_out);
+				mobodat_in, mobodat_in_out);
 	/* cpu <- oe <- mobodat_in <- we <- mobo */
-	bus bus(addr, data_in, t1_in, t2_in, t1_out, t2_out);
+	
+	bus bus(addr, mobodat_in, t1_in, t2_in, t1_out, t2_out);
 
 	wire dbg_enable;
 
