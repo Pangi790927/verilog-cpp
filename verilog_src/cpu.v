@@ -1,5 +1,6 @@
 `include "verilog_src/alu.v"
 `include "verilog_src/register.v"
+// `include "verilog_src/register_ex.v"
 `include "verilog_src/cpu_states.v"
 
 module cpu(
@@ -7,8 +8,8 @@ module cpu(
 		input		rst,
 		output	reg	[word_width-1 : 0] mobo_ctrl,
 		input		[word_width-1 : 0] mobo_stat,
-		output	reg	[word_width-1 : 0] addr,
-		output	reg	[word_width-1 : 0] data_out,
+		output		[word_width-1 : 0] addr,
+		output		[word_width-1 : 0] data_out,
 		input		[word_width-1 : 0] data_in
 	);
 
@@ -39,6 +40,26 @@ module cpu(
 	wire[4 : 0]                 alu_flags;
 	alu #(word_width, 5) alu(alu_oe, alu_opcode, t1_out, t2_out, alu_carry, alu_out, alu_flags);
 
+	wire 						addr_oe;
+	wire 						addr_we;
+	wire [word_width-1 : 0]		addr_in;
+	register addr_reg(clk, rst, addr_oe, addr_we, addr_in, addr);
+	/* cpu -> we -> addr -> oe -> mobo */
+
+	wire 						mobodat_out_oe;
+	wire 						mobodat_out_we;
+	wire [word_width-1 : 0]		mobodat_out_in;
+	register mobodata_out_reg(clk, rst, mobodat_out_oe, mobodat_out_we,
+			mobodat_out_in, data_out);
+	/* cpu -> we -> mobodat_out -> oe -> mobo */
+
+	wire 						mobodat_in_oe;
+	wire 						mobodat_in_we;
+	wire [word_width-1 : 0]		mobodat_in_out;
+	register mobodat_in_reg(clk, rst, mobodat_in_oe, mobodat_in_we,
+				data_in, mobodat_in_out);
+	/* cpu <- oe <- mobodat_in <- we <- mobo */
+
 	wire dbg_enable;
 
 	// FSM - sequential part
@@ -65,6 +86,14 @@ module cpu(
 
 		t2_we = 0;
 		t2_oe = 0;
+
+		addr_we = 0;
+		mobodat_out_we = 0;
+		mobodat_in_oe = 0;
+		/* we will disable those ctrl bits only on transfer */
+		addr_oe = 1;
+		mobodat_out_oe = 1;
+		mobodat_in_we = 1;
 
 		dbg_enable = 0;
 
@@ -107,10 +136,7 @@ module cpu(
 endmodule
 
 /*
-	Ce vrem sa facem:
-		sa scriem din cpu in vga
-	Cum:
-
-
+	STARE_N:
+		addr = addresa la care vrea cpu sa scrie/citeasca
 
 */
