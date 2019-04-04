@@ -1,6 +1,7 @@
 `include "verilog_src/alu.v"
 `include "verilog_src/register.v"
 `include "verilog_src/cpu_states.v"
+`include "verilog_src/bus.v"
 
 module cpu(
 		input		clk,
@@ -38,6 +39,8 @@ module cpu(
 	wire[word_width-1 : 0]      alu_out;
 	wire[4 : 0]                 alu_flags;
 	alu #(word_width, 5) alu(alu_oe, alu_opcode, t1_out, t2_out, alu_carry, alu_out, alu_flags);
+
+	bus bus(addr, data_in, t1_in, t2_in, t1_out, t2_out);
 
 	wire dbg_enable;
 
