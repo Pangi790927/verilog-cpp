@@ -9,7 +9,7 @@ module cpu(
 		input		rst,
 		output	reg	[word_width-1 : 0] mobo_ctrl,
 		input		[word_width-1 : 0] mobo_stat,
-		output		[word_width-1 : 0] addr,
+		output		[word_width-1 : 0] addr_out,
 		output		[word_width-1 : 0] mobodat_out,
 		input		[word_width-1 : 0] mobodat_in
 	);
@@ -44,7 +44,7 @@ module cpu(
 	wire 						addr_oe;
 	wire 						addr_we;
 	wire [word_width-1 : 0]		addr_in;
-	register addr_reg(clk, rst, addr_oe, addr_we, addr_in, addr);
+	register addr_reg(clk, rst, addr_oe, addr_we, addr_in, addr_out);
 	/* cpu -> we -> addr -> oe -> mobo */
 
 	wire 						mobodat_out_oe;
@@ -61,7 +61,8 @@ module cpu(
 				mobodat_in, mobodat_in_out);
 	/* cpu <- oe <- mobodat_in <- we <- mobo */
 	
-	bus bus(addr, mobodat_in, t1_in, t2_in, t1_out, t2_out);
+	wire [word_width-1 : 0]		dbg_in;
+	bus bus(addr_out, mobodat_in_out, t1_in, t2_in, t1_out, t2_out, dbg_in);
 
 	wire dbg_enable;
 
@@ -106,12 +107,13 @@ module cpu(
 			end
 
 			`C_STATE_TEST: begin
-				t1_in = 5;
 				t1_we = 1;
+				dbg_in = 5;
 
-				t2_in = 6;
-				t2_we = 1;
+				// t2_in = 6;
+				// t2_we = 1;
 
+				dbg_enable = 1;
 				next_state = `C_STATE_TEST + 1;
 			end
 

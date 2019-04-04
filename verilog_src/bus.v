@@ -6,22 +6,24 @@
  **/
 module bus(
         cpu_addr_in,
-        cpu_data_out,
+        cpu_data_in,
         t1_in,
         t2_in,
         t1_out,
-        t2_out
+        t2_out,
+        dbg_in
     );
 
 parameter word_width = 32;
 
-input[word_width-1 : 0] cpu_data_out;
+input[word_width-1 : 0] cpu_data_in;
 input[word_width-1 : 0] t1_out;
 input[word_width-1 : 0] t2_out;
 
 output[word_width-1 : 0] cpu_addr_in;
 output[word_width-1 : 0] t1_in;
 output[word_width-1 : 0] t2_in;
+output[word_width-1 : 0] dbg_in;
 // input [word_width-1 : 0] alu_out;
 // input [word_width-1 : 0] regs_in;
 // input [word_width-1 : 0] cp_in;
@@ -39,7 +41,7 @@ output[word_width-1 : 0] t2_in;
 
 wire [word_width-1 : 0]  bus;
 
-assign bus = cpu_data_out | t1_out | t2_out;
+assign bus = cpu_data_in | t1_out | t2_out | dbg_in;
 
 assign cpu_addr_in = bus;
 assign t1_in = bus;
