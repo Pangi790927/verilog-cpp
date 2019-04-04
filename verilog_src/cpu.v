@@ -2,6 +2,7 @@
 `include "verilog_src/register.v"
 // `include "verilog_src/register_ex.v"
 `include "verilog_src/cpu_states.v"
+`include "verilog_src/bus.v"
 
 module cpu(
 		input		clk,
@@ -59,6 +60,7 @@ module cpu(
 	register mobodat_in_reg(clk, rst, mobodat_in_oe, mobodat_in_we,
 				data_in, mobodat_in_out);
 	/* cpu <- oe <- mobodat_in <- we <- mobo */
+	bus bus(addr, data_in, t1_in, t2_in, t1_out, t2_out);
 
 	wire dbg_enable;
 
