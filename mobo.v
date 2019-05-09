@@ -95,7 +95,6 @@ module mobo(
 				next_state = `MOBO_DONE;
 
 			`MOBO_DONE: begin
-				$display("mobo_ctrl %d", mobo_ctrl);
 				mobo_stat_next = `STAT_DONE;
 				if (mobo_ctrl != 0)
 					next_state = `MOBO_DONE;

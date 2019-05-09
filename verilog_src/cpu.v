@@ -76,9 +76,14 @@ module cpu(
 
 	// FSM - sequential part
 	always @(posedge clk) begin
-		state <= `C_STATE_RESET;
+		state <= '{0, 0, 0};
 
 		if(!rst) begin
+			// $display("astate      %x, %d %d", state.ret_state,
+			// 		state.fcn_state, state.stack_level);
+
+			// $display("anext_state %x, %d %d", next_state.ret_state,
+			// 		next_state.fcn_state, next_state.stack_level);
 			state <= next_state;
 		end
 
@@ -86,6 +91,7 @@ module cpu(
 			$display("------------------ DEBUG ------------------");
 			$display("state: %x %s + %d", state.fcn_state,
 					cpu_str_state(state.fcn_state), (state.fcn_state & 'hf));
+			$display("stack_level: %d", state.stack_level);
 			$display("t1 content: %d", t1_out);
 			$display("t2 content: %d", t2_out);
 			$display("-------------------------------------------");
@@ -112,7 +118,7 @@ module cpu(
 
 		case(state.fcn_state)
 			`C_STATE_RESET: begin
-				func_next(next_state, `C_STATE_TEST);
+				func_next(state, next_state, `C_STATE_TEST);
 			end
 
 			`C_STATE_TEST: begin
@@ -120,7 +126,7 @@ module cpu(
 				dbg_in = 3;
 
 				dbg_enable = 1;
-				func_next(next_state, `C_STATE_TEST + 1);
+				func_next(state, next_state, `C_STATE_TEST + 1);
 			end
 
 			`C_STATE_TEST + 1: begin
@@ -128,7 +134,7 @@ module cpu(
 				dbg_in = 5;
 
 				dbg_enable = 1;
-				func_next(next_state, `C_STATE_TEST + 2);
+				func_next(state, next_state, `C_STATE_TEST + 2);
 			end
 
 			`C_STATE_TEST + 2: begin
@@ -137,7 +143,7 @@ module cpu(
 				addr_oe = 0;
 
 				dbg_enable = 1;
-				func_next(next_state, `C_STATE_TEST + 3);
+				func_next(state, next_state, `C_STATE_TEST + 3);
 			end
 
 			`C_STATE_TEST + 3: begin
@@ -189,7 +195,7 @@ module cpu(
 // >>>>>>> Stashed changes
 
 			`C_STATE_HLT: begin
-				func_next(next_state, `C_STATE_HLT);
+				func_next(state, next_state, `C_STATE_HLT);
 			end
 		endcase
 	end

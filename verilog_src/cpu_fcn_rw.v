@@ -19,13 +19,14 @@ module cpu_fcn_rw(
 				if (mobo_stat == `STAT_IDLE) begin
 					mobo_ctrl = `CTRL_READ;
 
-					func_next(next_state, `C_STATE_READ + 1);
+					func_next(state, next_state, `C_STATE_READ + 1);
 				end
 			end
 
 			`C_STATE_READ + 1: begin
+				dbg_enable = 1;
 				if (mobo_stat == `STAT_DONE) begin
-					$display("Done writing");
+					$display("Done reading");
 					mobo_ctrl = `CTRL_NONE;
 
 					func_ret(state, next_state);
@@ -34,16 +35,18 @@ module cpu_fcn_rw(
 
 		/* fcn */
 			`C_STATE_WRITE: begin
+				dbg_enable = 1;
 				if (mobo_stat == `STAT_IDLE) begin
 					mobo_ctrl = `CTRL_WRITE;
 
-					func_next(next_state, `C_STATE_WRITE + 1);
+					func_next(state, next_state, `C_STATE_WRITE + 1);
 				end
 			end
 		
 			`C_STATE_WRITE + 1: begin
+				dbg_enable = 1;
 				if (mobo_stat == `STAT_DONE) begin
-					$display("Done reading");
+					$display("Done writing");
 					mobo_ctrl = `CTRL_NONE;
 
 					func_ret(state, next_state);
