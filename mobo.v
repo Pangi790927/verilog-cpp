@@ -27,6 +27,7 @@ module mobo(
 	);
 
 	parameter word_width = 32;
+	
 	/* Intern state, usefull for waiting for device response */
 	reg [word_width-1:0] state 		= 0;
 	reg [word_width-1:0] next_state = 0;

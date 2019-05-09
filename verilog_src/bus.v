@@ -45,6 +45,7 @@ assign bus = cpu_data_in | t1_out | t2_out | dbg_in;
 assign cpu_addr_in = bus;
 assign t1_in = bus;
 assign t2_in = bus;
+
 // assign am_out = bus;
 // assign aie_out = bus;
 // assign ram_out = bus;
