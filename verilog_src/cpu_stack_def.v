@@ -1,4 +1,4 @@
-`ifndef CPU_STACK_DEF
-`define CPU_STACK_DEF
+`ifndef CPU_STACK_DEF_V
+`define CPU_STACK_DEF_V
 
 `endif

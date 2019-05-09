@@ -12,7 +12,7 @@ module mobo_vga(
 		output	[word_width-1 : 0]	data_out
 	);
 
-	parameter word_width = 32;
+	parameter word_width = `WORD_WIDTH;
 
 	always @(*) begin
 		case (state)

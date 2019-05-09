@@ -21,7 +21,7 @@ module alu(
 `define SHR                 8
 `define SAR                 9
 
-parameter width = 32;
+parameter width = `WORD_WIDTH;
 parameter flags_width = 5;
 
 input                       oe;

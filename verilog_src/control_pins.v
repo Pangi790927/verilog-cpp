@@ -1,3 +1,5 @@
+`ifndef CONTROL_PINS_V
+`define CONTROL_PINS_V
 
 `define CPU_WRITE	16'b0000_0000_0000_0001
 `define CPU_READ	16'b0000_0000_0000_0010
@@ -12,3 +14,5 @@
 `define VGA_READ_PIN		0
 `define VGA_WRITE_PIN		1
 `define VGA_ACK				0
+
+`endif

@@ -1,6 +1,6 @@
+`include "verilog_src/global_const.v"
 `include "verilog_src/alu.v"
 `include "verilog_src/register.v"
-// `include "verilog_src/register_ex.v"
 `include "verilog_src/cpu_states.v"
 `include "verilog_src/bus.v"
 `include "verilog_src/mobo_ctrl.v"
@@ -18,7 +18,7 @@ module cpu(
 		input		[word_width-1 : 0] mobodat_in
 	);
 
-	parameter word_width = 32;
+	parameter word_width = `WORD_WIDTH;
 
 	reg[word_width-1 : 0] 		state 			= 0;
 	reg[word_width-1 : 0] 		next_state		= 0;

@@ -14,7 +14,7 @@ module bus(
         dbg_in
     );
 
-parameter word_width = 32;
+parameter word_width = `WORD_WIDTH;
 
 input[word_width-1 : 0] cpu_data_in;
 input[word_width-1 : 0] t1_out;

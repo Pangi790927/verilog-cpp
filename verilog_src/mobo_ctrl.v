@@ -1,6 +1,11 @@
+`ifndef MOBO_CTRL_V
+`define MOBO_CTRL_V
+
 `define CTRL_NONE	32'b0000_0000
 `define CTRL_WRITE	32'b0000_0001
 `define CTRL_READ	32'b0000_0010
 
 `define STAT_IDLE	32'b0000_0001
 `define STAT_DONE	32'b0000_0010
+
+`endif

@@ -1,3 +1,4 @@
+`include "verilog_src/global_const.v"
 `include "verilog_src/control_pins.v"
 `include "verilog_src/mobo_ctrl.v"
 `include "verilog_src/address_translate.v"
@@ -26,8 +27,8 @@ module mobo(
 		output	reg	[word_width-1:0]	data_out
 	);
 
-	parameter word_width = 32;
-	
+	parameter word_width = `WORD_WIDTH;
+
 	/* Intern state, usefull for waiting for device response */
 	reg [word_width-1:0] state 		= 0;
 	reg [word_width-1:0] next_state = 0;

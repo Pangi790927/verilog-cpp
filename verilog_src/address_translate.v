@@ -13,7 +13,7 @@ module addr_translate(
 		output [word_width-1 : 0] trans_state
 	);
 	
-	parameter word_width = 32;
+	parameter word_width = `WORD_WIDTH;
 
 	function logic in_state(
 			input[word_width-1 : 0] left,

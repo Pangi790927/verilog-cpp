@@ -1,3 +1,6 @@
+`ifndef MOBO_STATES
+`define MOBO_STATES
+
 `define MOBO_IDLE			32'h0000
 `define MOBO_VGA_WRITE		32'h0010
 `define MOBO_VGA_READ		32'h0020
@@ -5,3 +8,5 @@
 `define MOBO_RAM_READ		32'h0040
 `define MOBO_ERR_ADDR		32'h0050
 `define MOBO_DONE			32'h0060
+
+`endif

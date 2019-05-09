@@ -29,7 +29,7 @@ module registers(
         disp_out
     );
 
-parameter width = 32;
+parameter width = `WORD_WIDTH;
 parameter depth = 8;
 parameter addr_width = 3;
 

@@ -1,3 +1,6 @@
+`ifndef CPU_STATES_V
+`define CPU_STATES_V
+
 `define C_STATE_RESET			'h00 // reset state
 `define C_STATE_TEST			'h10 // load instruction to instruction register
 `define C_STATE_HLT				'h20 // load instruction to instruction register
@@ -16,3 +19,5 @@ function string cpu_str_state(int state);
 		default: return "unknown, pls add this state";
 	endcase
 endfunction
+
+`endif
