@@ -35,6 +35,7 @@ module mobo(
 	/* Those are from cpu perspective */
 	wire [word_width-1 : 0] mobo_ctrl;
 	reg [word_width-1 : 0] mobo_stat = 0;
+	reg [word_width-1 : 0] mobo_stat_next = 0;
 	wire [word_width-1 : 0] cpu_addr;
 	wire [word_width-1 : 0] cpu_data_out;
 	reg [word_width-1 : 0] cpu_data_in = 0;
@@ -58,6 +59,7 @@ module mobo(
 		end
 		else begin
 			state <= next_state;
+			mobo_stat <= mobo_stat_next;
 		end
 	end
 
@@ -91,11 +93,11 @@ module mobo(
 				next_state = `MOBO_DONE;
 
 			`MOBO_DONE: begin
-				mobo_stat = `STAT_DONE;
+				mobo_stat_next = `STAT_DONE;
 				if (mobo_ctrl != 0)
 					next_state = `MOBO_DONE;
 				else begin
-					mobo_stat = `STAT_IDLE;
+					mobo_stat_next = `STAT_IDLE;
 					next_state = `MOBO_IDLE;
 				end
 			end
