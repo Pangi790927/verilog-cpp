@@ -18,8 +18,10 @@ module cpu(
 
 	parameter word_width = 32;
 
-	reg[word_width-1 : 0] 		state 		= 0;
-	reg[word_width-1 : 0] 		next_state	= 0;
+	reg[word_width-1 : 0] 		state 			= 0;
+	reg[word_width-1 : 0] 		next_state		= 0;
+	reg[word_width-1 : 0] 		ret_state 		= 0;
+	reg[word_width-1 : 0] 		next_ret_state	= 0;
 
 	// instantiate T1 register and related connections
 	wire                        t1_oe;
@@ -72,8 +74,10 @@ module cpu(
 	always @(posedge clk) begin
 		state <= `C_STATE_RESET;
 
-		if(!rst)
+		if(!rst) begin
 			state <= next_state;
+			ret_state <= next_ret_state;
+		end
 
 		if (dbg_enable) begin
 			$display("------------------ DEBUG ------------------");
@@ -110,7 +114,7 @@ module cpu(
 
 			`C_STATE_TEST: begin
 				t1_we = 1;
-				dbg_in = 5;
+				dbg_in = 3;
 
 				dbg_enable = 1;
 				next_state = `C_STATE_TEST + 1;
@@ -118,7 +122,7 @@ module cpu(
 
 			`C_STATE_TEST + 1: begin
 				t2_we = 1;
-				dbg_in = 7;
+				dbg_in = 5;
 
 				dbg_enable = 1;
 				next_state = `C_STATE_TEST + 2;
@@ -126,9 +130,20 @@ module cpu(
 
 			`C_STATE_TEST + 2: begin
 				t1_oe = 1;
-				t2_oe = 1;
+				addr_we = 1;
+				addr_oe = 0;
 
 				dbg_enable = 1;
+				next_state = `C_STATE_TEST + 3;
+			end
+
+			`C_STATE_TEST + 3: begin
+				t2_oe = 1;
+				mobodat_out_we = 1;
+				mobodat_out_oe = 0;
+
+				dbg_enable = 1;
+// <<<<<<< Updated upstream
 				next_state = `C_STATE_TEST_WRITE;
 			end
 
@@ -162,6 +177,40 @@ module cpu(
 
 					next_state = `C_STATE_HLT;
 				end
+// =======
+// 				next_state = `C_STATE_TEST + 4;
+// 			end
+			
+// 			`C_STATE_TEST + 4: begin
+// 				dbg_enable = 1;
+				
+// 				next_ret_state = `C_STATE_TEST + 5;
+// 				next_state = `C_STATE_WRITE;
+// 			end
+
+// 			`C_STATE_TEST + 5: begin
+// 				dbg_enable = 1;
+				
+// 				next_ret_state = `C_STATE_TEST + 6;
+// 				next_state = `C_STATE_READ;
+// 			end
+
+// 			`C_STATE_TEST + 6: begin
+// 				dbg_enable = 1;
+				
+// 				mobodat_in_oe = 1;
+// 				mobodat_in_we = 0;
+// 				t1_we = 1;
+
+// 				next_state = `C_STATE_TEST + 7;
+// 			end
+
+// 			`C_STATE_TEST + 6: begin
+// 				dbg_enable = 1;
+// 				t1_oe = 1;
+
+// 				next_state = `C_STATE_HLT;
+// >>>>>>> Stashed changes
 			end
 
 			`C_STATE_HLT: begin
