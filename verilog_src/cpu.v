@@ -84,7 +84,7 @@ module cpu(
 
 		if (dbg_enable) begin
 			$display("------------------ DEBUG ------------------");
-			$display("state: %x %s + %d", state,
+			$display("state: %x %s + %d", state.fcn_state,
 					cpu_str_state(state.fcn_state), (state.fcn_state & 'hf));
 			$display("t1 content: %d", t1_out);
 			$display("t2 content: %d", t2_out);
@@ -146,47 +146,13 @@ module cpu(
 				mobodat_out_oe = 0;
 
 				dbg_enable = 1;
-// <<<<<<< Updated upstream
-				func_next(next_state, `C_STATE_TEST_WRITE);
+				func_call(state, next_state, `C_STATE_READ, `C_STATE_TEST + 4);
 			end
 
-			`C_STATE_TEST_WRITE: begin
+			`C_STATE_TEST + 4: begin
 				dbg_enable = 1;
-				$display("mobo_stat %x", mobo_stat);
-				if (mobo_stat == `STAT_IDLE) begin
-					mobo_ctrl = `CTRL_WRITE;
-
-					func_next(next_state, `C_STATE_TEST_WRITE + 1);
-				end
+				func_call(state, next_state, `C_STATE_WRITE, `C_STATE_HLT);
 			end
-
-			`C_STATE_TEST_WRITE + 1: begin
-				dbg_enable = 1;
-				if (mobo_stat == `STAT_DONE) begin
-					$display("Done writing");
-					mobo_ctrl = `CTRL_NONE;
-
-					func_next(next_state, `C_STATE_TEST_WRITE + 2);
-				end
-			end
-
-			`C_STATE_TEST_WRITE + 2: begin
-				dbg_enable = 1;
-				if (mobo_stat == `STAT_IDLE) begin
-					mobo_ctrl = `CTRL_READ;
-
-					func_next(next_state, `C_STATE_TEST_WRITE + 3);
-				end
-			end
-
-			`C_STATE_TEST_WRITE + 3: begin
-				dbg_enable = 1;
-				if (mobo_stat == `STAT_DONE) begin
-					$display("Done reading");
-					mobo_ctrl = `CTRL_NONE;
-
-					func_next(next_state, `C_STATE_HLT);
-				end
 // =======
 // 				next_state = `C_STATE_TEST + 4;
 // 			end
@@ -221,7 +187,6 @@ module cpu(
 
 // 				next_state = `C_STATE_HLT;
 // >>>>>>> Stashed changes
-			end
 
 			`C_STATE_HLT: begin
 				func_next(next_state, `C_STATE_HLT);

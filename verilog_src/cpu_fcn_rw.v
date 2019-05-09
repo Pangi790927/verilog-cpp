@@ -14,18 +14,41 @@ module cpu_fcn_rw(
 	always @(*) begin
 		case (state.fcn_state)
 		/* fcn */
-			`C_STATE_READ:
-				func_next(next_state, `C_STATE_READ + 1);
+			`C_STATE_READ: begin
+				dbg_enable = 1;
+				if (mobo_stat == `STAT_IDLE) begin
+					mobo_ctrl = `CTRL_READ;
 
-			`C_STATE_READ + 1:
-				func_ret(state, next_state);
-		
+					func_next(next_state, `C_STATE_READ + 1);
+				end
+			end
+
+			`C_STATE_READ + 1: begin
+				if (mobo_stat == `STAT_DONE) begin
+					$display("Done writing");
+					mobo_ctrl = `CTRL_NONE;
+
+					func_ret(state, next_state);
+				end
+			end
+
 		/* fcn */
-			`C_STATE_WRITE:
-				func_next(next_state, `C_STATE_WRITE + 1);
+			`C_STATE_WRITE: begin
+				if (mobo_stat == `STAT_IDLE) begin
+					mobo_ctrl = `CTRL_WRITE;
+
+					func_next(next_state, `C_STATE_WRITE + 1);
+				end
+			end
 		
-			`C_STATE_WRITE + 1:
-				func_ret(state, next_state);
+			`C_STATE_WRITE + 1: begin
+				if (mobo_stat == `STAT_DONE) begin
+					$display("Done reading");
+					mobo_ctrl = `CTRL_NONE;
+
+					func_ret(state, next_state);
+				end
+			end
 		endcase
 	end
 endmodule
