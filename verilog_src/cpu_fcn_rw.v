@@ -18,14 +18,14 @@ module cpu_fcn_rw(
 				func_next(next_state, `C_STATE_READ + 1);
 
 			`C_STATE_READ + 1:
-				func_ret(next_state);
+				func_ret(state, next_state);
 		
 		/* fcn */
 			`C_STATE_WRITE:
 				func_next(next_state, `C_STATE_WRITE + 1);
 		
 			`C_STATE_WRITE + 1:
-				func_ret(next_state);
+				func_ret(state, next_state);
 		endcase
 	end
 endmodule
