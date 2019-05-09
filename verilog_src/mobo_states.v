@@ -1,0 +1,3 @@
+`define MOBO_IDLE			32'h0000
+`define MOBO_ERR_ADDR		32'h0050
+`define MOBO_DONE			32'h0060

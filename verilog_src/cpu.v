@@ -3,6 +3,8 @@
 // `include "verilog_src/register_ex.v"
 `include "verilog_src/cpu_states.v"
 `include "verilog_src/bus.v"
+`include "verilog_src/mobo_ctrl.v"
+`include "verilog_src/mobo_states.v"
 
 module cpu(
 		input		clk,
@@ -110,16 +112,13 @@ module cpu(
 				t1_we = 1;
 				dbg_in = 5;
 
-				// t2_in = 6;
-				// t2_we = 1;
-
 				dbg_enable = 1;
 				next_state = `C_STATE_TEST + 1;
 			end
 
 			`C_STATE_TEST + 1: begin
-				t1_oe = 1;
-				t2_oe = 1;
+				t2_we = 1;
+				dbg_in = 7;
 
 				dbg_enable = 1;
 				next_state = `C_STATE_TEST + 2;
@@ -130,7 +129,39 @@ module cpu(
 				t2_oe = 1;
 
 				dbg_enable = 1;
-				next_state = `C_STATE_HLT;
+				next_state = `C_STATE_TEST_WRITE;
+			end
+
+			`C_STATE_TEST_WRITE: begin
+				if (mobo_stat == `MOBO_IDLE) begin
+					mobo_ctrl = `CTRL_WRITE;
+
+					next_state = `C_STATE_TEST_WRITE + 1;
+				end
+			end
+
+			`C_STATE_TEST_WRITE + 1: begin
+				if (mobo_stat == `MOBO_DONE) begin
+					$display("Done writing");
+
+					next_state = `C_STATE_TEST_WRITE + 2;
+				end
+			end
+
+			`C_STATE_TEST_WRITE + 2: begin
+				if (mobo_stat == `MOBO_IDLE) begin
+					mobo_ctrl = `CTRL_READ;
+
+					next_state = `C_STATE_TEST_WRITE + 3;
+				end
+			end
+
+			`C_STATE_TEST_WRITE + 3: begin
+				if (mobo_stat == `MOBO_DONE) begin
+					$display("Done reading");
+
+					next_state = `C_STATE_HLT;
+				end
 			end
 
 			`C_STATE_HLT: begin

@@ -1,6 +1,7 @@
 `define C_STATE_RESET			'h00 // reset state
 `define C_STATE_TEST			'h10 // load instruction to instruction register
 `define C_STATE_HLT				'h20 // load instruction to instruction register
+`define C_STATE_TEST_WRITE		'h30 // load instruction to instruction register
 
 function string cpu_str_state(int state);
 	case (state & ~'hf)

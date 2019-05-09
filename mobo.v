@@ -5,10 +5,7 @@
 
 `include "verilog_src/mobo_vga.v"
 `include "verilog_src/mobo_ram.v"
-
-`define MOBO_IDLE			32'h0000
-`define MOBO_ERR_ADDR		32'h0050
-`define MOBO_DONE			32'h0060
+`include "verilog_src/mobo_states.v"
 
 module mobo(
 		/* clk, rst - those are required on all devices */

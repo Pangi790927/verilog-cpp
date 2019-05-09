@@ -38,7 +38,6 @@ output[word_width-1 : 0] dbg_in;
 // output[word_width-1 : 0] cp_out;
 // output[word_width-1 : 0] ind_out;
 
-
 wire [word_width-1 : 0]  bus;
 
 assign bus = cpu_data_in | t1_out | t2_out | dbg_in;
