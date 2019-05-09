@@ -5,6 +5,8 @@
 `include "verilog_src/bus.v"
 `include "verilog_src/mobo_ctrl.v"
 `include "verilog_src/mobo_states.v"
+`include "verilog_src/cpu_stack_def.v"
+`include "verilog_src/cpu_fcn_rw.v"
 
 module cpu(
 		input		clk,
@@ -69,6 +71,9 @@ module cpu(
 	bus bus(addr_out, mobodat_in_out, t1_in, t2_in, t1_out, t2_out, dbg_in);
 
 	wire dbg_enable;
+
+	/* fcn modules */
+	cpu_fcn_rw cpu_fcn_rw(state, next_state, mobo_stat, mobo_ctrl, dbg_enable);
 
 	// FSM - sequential part
 	always @(posedge clk) begin
@@ -226,9 +231,3 @@ module cpu(
 		endcase
 	end
 endmodule
-
-/*
-	STARE_N:
-		addr = addresa la care vrea cpu sa scrie/citeasca
-
-*/
