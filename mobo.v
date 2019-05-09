@@ -35,7 +35,7 @@ module mobo(
 	/* Those are from cpu perspective */
 	wire [word_width-1 : 0] mobo_ctrl;
 	reg [word_width-1 : 0] mobo_stat = 0;
-	reg [word_width-1 : 0] mobo_stat_next = 0;
+	reg [word_width-1 : 0] mobo_stat_next = `STAT_IDLE;
 	wire [word_width-1 : 0] cpu_addr;
 	wire [word_width-1 : 0] cpu_data_out;
 	reg [word_width-1 : 0] cpu_data_in = 0;
@@ -55,7 +55,7 @@ module mobo(
 
 	always @(posedge clk or posedge rst) begin
 		if (rst) begin
-			state <= 0;
+			state <= `MOBO_IDLE;
 		end
 		else begin
 			state <= next_state;
@@ -93,6 +93,7 @@ module mobo(
 				next_state = `MOBO_DONE;
 
 			`MOBO_DONE: begin
+				$display("mobo_ctrl %d", mobo_ctrl);
 				mobo_stat_next = `STAT_DONE;
 				if (mobo_ctrl != 0)
 					next_state = `MOBO_DONE;

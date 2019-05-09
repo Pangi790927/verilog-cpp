@@ -1,6 +1,3 @@
-`define MOBO_RAM_WRITE		32'h0010
-`define MOBO_RAM_READ		32'h0020
-`define MOBO_DONE			32'h0060
 
 module mobo_ram(
 		input	[word_width-1 : 0]	state,

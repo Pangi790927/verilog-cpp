@@ -12,6 +12,7 @@ function string cpu_str_state(int state);
 		`C_STATE_HLT:	return "C_STATE_HLT";
 		`C_STATE_READ:	return "C_STATE_READ";
 		`C_STATE_WRITE:	return "C_STATE_WRITE";
+		`C_STATE_TEST_WRITE: return "C_STATE_TEST_WRITE";
 		default: return "unknown, pls add this state";
 	endcase
 endfunction

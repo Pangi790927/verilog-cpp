@@ -1,3 +1,4 @@
+`define CTRL_NONE	32'b0000_0000
 `define CTRL_WRITE	32'b0000_0001
 `define CTRL_READ	32'b0000_0010
 

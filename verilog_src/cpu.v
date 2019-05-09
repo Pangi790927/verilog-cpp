@@ -149,7 +149,8 @@ module cpu(
 
 			`C_STATE_TEST_WRITE: begin
 				dbg_enable = 1;
-				if (mobo_stat == `MOBO_IDLE) begin
+				$display("mobo_stat %x", mobo_stat);
+				if (mobo_stat == `STAT_IDLE) begin
 					mobo_ctrl = `CTRL_WRITE;
 
 					next_state = `C_STATE_TEST_WRITE + 1;
@@ -158,8 +159,9 @@ module cpu(
 
 			`C_STATE_TEST_WRITE + 1: begin
 				dbg_enable = 1;
-				if (mobo_stat == `MOBO_DONE) begin
+				if (mobo_stat == `STAT_DONE) begin
 					$display("Done writing");
+					mobo_ctrl = `CTRL_NONE;
 
 					next_state = `C_STATE_TEST_WRITE + 2;
 				end
@@ -167,7 +169,7 @@ module cpu(
 
 			`C_STATE_TEST_WRITE + 2: begin
 				dbg_enable = 1;
-				if (mobo_stat == `MOBO_IDLE) begin
+				if (mobo_stat == `STAT_IDLE) begin
 					mobo_ctrl = `CTRL_READ;
 
 					next_state = `C_STATE_TEST_WRITE + 3;
@@ -176,8 +178,9 @@ module cpu(
 
 			`C_STATE_TEST_WRITE + 3: begin
 				dbg_enable = 1;
-				if (mobo_stat == `MOBO_DONE) begin
+				if (mobo_stat == `STAT_DONE) begin
 					$display("Done reading");
+					mobo_ctrl = `CTRL_NONE;
 
 					next_state = `C_STATE_HLT;
 				end
