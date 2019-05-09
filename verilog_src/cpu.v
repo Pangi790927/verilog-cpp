@@ -17,13 +17,12 @@ module cpu(
 		output		[word_width-1 : 0] mobodat_out,
 		input		[word_width-1 : 0] mobodat_in
 	);
+	`include "verilog_src/cpu_stack_fcn.v"
 
 	parameter word_width = `WORD_WIDTH;
 
-	reg[word_width-1 : 0] 		state 			= 0;
-	reg[word_width-1 : 0] 		next_state		= 0;
-	reg[word_width-1 : 0] 		ret_state 		= 0;
-	reg[word_width-1 : 0] 		next_ret_state	= 0;
+	state_t state 		= '{0, 0, 0};
+	state_t next_state	= '{0, 0, 0};
 
 	// instantiate T1 register and related connections
 	wire                        t1_oe;
@@ -81,13 +80,12 @@ module cpu(
 
 		if(!rst) begin
 			state <= next_state;
-			ret_state <= next_ret_state;
 		end
 
 		if (dbg_enable) begin
 			$display("------------------ DEBUG ------------------");
 			$display("state: %x %s + %d", state,
-					cpu_str_state(state), (state & 'hf));
+					cpu_str_state(state.fcn_state), (state.fcn_state & 'hf));
 			$display("t1 content: %d", t1_out);
 			$display("t2 content: %d", t2_out);
 			$display("-------------------------------------------");
@@ -95,7 +93,7 @@ module cpu(
 	end
 
 	// FSM - combinational part
-	always @(state) begin
+	always @(*) begin
 		t1_we = 0;
 		t1_oe = 0;
 
@@ -112,9 +110,9 @@ module cpu(
 
 		dbg_enable = 0;
 
-		case(state)
+		case(state.fcn_state)
 			`C_STATE_RESET: begin
-				next_state = `C_STATE_TEST;
+				func_next(next_state, `C_STATE_TEST);
 			end
 
 			`C_STATE_TEST: begin
@@ -122,7 +120,7 @@ module cpu(
 				dbg_in = 3;
 
 				dbg_enable = 1;
-				next_state = `C_STATE_TEST + 1;
+				func_next(next_state, `C_STATE_TEST + 1);
 			end
 
 			`C_STATE_TEST + 1: begin
@@ -130,7 +128,7 @@ module cpu(
 				dbg_in = 5;
 
 				dbg_enable = 1;
-				next_state = `C_STATE_TEST + 2;
+				func_next(next_state, `C_STATE_TEST + 2);
 			end
 
 			`C_STATE_TEST + 2: begin
@@ -139,7 +137,7 @@ module cpu(
 				addr_oe = 0;
 
 				dbg_enable = 1;
-				next_state = `C_STATE_TEST + 3;
+				func_next(next_state, `C_STATE_TEST + 3);
 			end
 
 			`C_STATE_TEST + 3: begin
@@ -149,7 +147,7 @@ module cpu(
 
 				dbg_enable = 1;
 // <<<<<<< Updated upstream
-				next_state = `C_STATE_TEST_WRITE;
+				func_next(next_state, `C_STATE_TEST_WRITE);
 			end
 
 			`C_STATE_TEST_WRITE: begin
@@ -158,7 +156,7 @@ module cpu(
 				if (mobo_stat == `STAT_IDLE) begin
 					mobo_ctrl = `CTRL_WRITE;
 
-					next_state = `C_STATE_TEST_WRITE + 1;
+					func_next(next_state, `C_STATE_TEST_WRITE + 1);
 				end
 			end
 
@@ -168,7 +166,7 @@ module cpu(
 					$display("Done writing");
 					mobo_ctrl = `CTRL_NONE;
 
-					next_state = `C_STATE_TEST_WRITE + 2;
+					func_next(next_state, `C_STATE_TEST_WRITE + 2);
 				end
 			end
 
@@ -177,7 +175,7 @@ module cpu(
 				if (mobo_stat == `STAT_IDLE) begin
 					mobo_ctrl = `CTRL_READ;
 
-					next_state = `C_STATE_TEST_WRITE + 3;
+					func_next(next_state, `C_STATE_TEST_WRITE + 3);
 				end
 			end
 
@@ -187,7 +185,7 @@ module cpu(
 					$display("Done reading");
 					mobo_ctrl = `CTRL_NONE;
 
-					next_state = `C_STATE_HLT;
+					func_next(next_state, `C_STATE_HLT);
 				end
 // =======
 // 				next_state = `C_STATE_TEST + 4;
@@ -226,7 +224,7 @@ module cpu(
 			end
 
 			`C_STATE_HLT: begin
-				next_state = `C_STATE_HLT;
+				func_next(next_state, `C_STATE_HLT);
 			end
 		endcase
 	end

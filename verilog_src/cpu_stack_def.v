@@ -8,6 +8,6 @@ typedef struct packed {
 	reg[max_stack_lvl-1 : 0][word_width-1 : 0] ret_state;
 	reg[word_width-1 : 0] fcn_state;
 	reg[word_width-1 : 0] stack_level;
-} test_struct;
+} state_t;
 
 `endif
