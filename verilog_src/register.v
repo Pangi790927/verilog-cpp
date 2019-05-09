@@ -11,7 +11,7 @@ module register(
         out
     );
 
-parameter word_width = 32;
+parameter word_width = `WORD_WIDTH;
 
 input               clk;
 input               rst;

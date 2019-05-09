@@ -8,8 +8,6 @@
 `include "verilog_src/mobo_ram.v"
 `include "verilog_src/mobo_states.v"
 
-`include "test.v"
-
 module mobo(
 		/* clk, rst - those are required on all devices */
 		input				clk,
