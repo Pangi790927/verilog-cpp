@@ -42,7 +42,7 @@ module cpu_fcn_rw(
 					func_next(state, next_state, `C_STATE_WRITE + 1);
 				end
 			end
-		
+
 			`C_STATE_WRITE + 1: begin
 				dbg_enable = 1;
 				if (mobo_stat == `STAT_DONE) begin

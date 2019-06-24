@@ -1,0 +1,86 @@
+registers:
+	eax, ebx, ecx, edx, esi, edi, esp, ebp
+	ax, bx, cx, dx
+	ah, bh, ch, dh
+	al, bl, cl, dl
+
+instructions:
+	# from 8086 file
+	* arithmetic:
+	ADC
+	ADD
+	CMP
+	DEC
+	INC
+	NEG
+	SBB
+	SUB
+
+	* bitwise
+	AND
+	NOT
+	OR
+	XOR
+	SHL
+	SHR
+	SAL
+	SAR
+	ROL
+	ROR
+
+	* stack:
+	POP
+	PUSH
+	POPA
+	PUSHA
+	POPF
+	PUSHF
+
+	* calls:
+	CALL
+	INT
+	IRET
+	J*  - there are 11 of those
+	JN* - there are 11 of those
+	JMP
+	LOOP* ?
+	REP* ?
+
+	* compare:
+	CMP
+	TEST
+
+	* misc
+	HLT
+	NOP
+
+	* io
+	IN
+	OUT
+
+	* mov
+	LDS ?
+	LEA ?
+	MOV
+	XCHG
+	
+	* flags:
+	CLC
+	CLD
+	CLI
+	CMC
+	STC
+	STD
+	STI
+
+
+adress-mode:
+	# https://www.geeksforgeeks.org/addressing-modes-8086-microprocessor/
+
+	MOV AX, BX			Register mode
+	MOV CL, 0A			Immediate mode
+	MOV AX, [0500]		Displacement or direct mode
+	MOV AX, [DI]		Register indirect mode
+	MOV AL, [BP+SI]		Based indexed mode
+
+instr-code:
