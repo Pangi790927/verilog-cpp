@@ -14,23 +14,12 @@ struct RAM {
 	std::shared_ptr<char[]> mem = nullptr;
 	size_t size = 0;
 
-	//std::future<void> async_run;
 	std::atomic<bool> done = false;
 	std::mutex mu;
 
 	RAM (Mobo &mobo, size_t size) : mobo(mobo), size(size) {
 		mem = std::shared_ptr<char[]>(new char[size]);
 
-		/*async_run = std::async([&] {
-			while (!done) {
-				// std::lock_guard<std::mutex> guard(mobo.mu);
-				while (mobo.lock.test_and_set(std::memory_order_acquire))
-					; // spin
-
-				
-				mobo.lock.clear(std::memory_order_release);
-			}
-		});*/
 	}
 
 	void refresh() {
@@ -45,7 +34,6 @@ struct RAM {
 			mem[mobo.chip->addr] = mobo.chip->data_out;
 			mobo.chip->ram_stat |= RAM_ACK;
 		}
-
 	}
 
 	~RAM() {

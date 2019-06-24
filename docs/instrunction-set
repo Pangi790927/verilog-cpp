@@ -1,12 +1,12 @@
 registers:
 	eax, ebx, ecx, edx, esi, edi, esp, ebp
-	ax, bx, cx, dx
-	ah, bh, ch, dh
-	al, bl, cl, dl
+	ax,  bx,  cx,  dx  
+	ah,  bh,  ch,  dh
+	al,  bl,  cl,  dl
 
-instructions:
+instructions: (total cnt > 66)
 	# from 8086 file
-	* arithmetic:
+	* arithmetic: (cnt - 8)
 	ADC
 	ADD
 	CMP
@@ -16,7 +16,7 @@ instructions:
 	SBB
 	SUB
 
-	* bitwise
+	* bitwise: (cnt - 10)
 	AND
 	NOT
 	OR
@@ -28,7 +28,7 @@ instructions:
 	ROL
 	ROR
 
-	* stack:
+	* stack: (cnt - 6)
 	POP
 	PUSH
 	POPA
@@ -36,7 +36,7 @@ instructions:
 	POPF
 	PUSHF
 
-	* calls:
+	* calls: (cnt > 27)
 	CALL
 	INT
 	IRET
@@ -46,25 +46,25 @@ instructions:
 	LOOP* ?
 	REP* ?
 
-	* compare:
+	* compare: (cnt - 2)
 	CMP
 	TEST
 
-	* misc
+	* misc: (cnt - 2)
 	HLT
 	NOP
 
-	* io
+	* io: (cnt - 2)
 	IN
 	OUT
 
-	* mov
+	* mov: (cnt > 2)
 	LDS ?
 	LEA ?
 	MOV
 	XCHG
 	
-	* flags:
+	* flags: (cnt - 7)
 	CLC
 	CLD
 	CLI
@@ -77,10 +77,48 @@ instructions:
 adress-mode:
 	# https://www.geeksforgeeks.org/addressing-modes-8086-microprocessor/
 
-	MOV AX, BX			Register mode
-	MOV CL, 0A			Immediate mode
-	MOV AX, [0500]		Displacement or direct mode
-	MOV AX, [DI]		Register indirect mode
-	MOV AL, [BP+SI]		Based indexed mode
+	MOV AX, BX				Register mode
+	MOV CL, 0A				Immediate mode
+	MOV AX, [0500]			Displacement or direct mode
+	MOV AX, [DI]			Register indirect mode
+	MOV AL, [BP+SI]			Based indexed mode
+	MOV AX, [SI+2000]		Indexed mode
+	MOV AL, [SI+BP+2000]	Based indexed displacement mode
+
+	or:
+	MOV [SI+BP+2000], AL
 
 instr-code:
+0	#  INSTR CODE
+	|  ^
+	|  ^
+	|  ^
+	|  ^
+	|  ^
+	|  ^
+	|  ^
+8	#  DIRECTION
+	|  ADDRESS MODE
+	|  ^
+	|  ^
+	|  REG  
+	|  ^
+	|  ^
+	|  ^
+16	#  ^
+	|  OP REG 1
+	|  ^
+	|  ^
+	|  ^
+	|  ^
+	|  OP REG 2
+	|  ^
+24	#  ^
+	|  ^
+	|  ^
+	|  X
+	|  X
+	|  X
+	|  X
+	|  X
+32
