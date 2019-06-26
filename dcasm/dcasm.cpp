@@ -1,4 +1,7 @@
 #include <fstream>
+#include <iostream>
+#include <string>
+#include <map>
 
 std::map<std::string, std::tuple<int, int, int>> instr = {
 /*    ins    code  addr_mode    op_cnt */
@@ -16,9 +19,9 @@ std::map<std::string, std::tuple<int, int, int>> instr = {
 
 /*
 	TASK LIST:
-		[-] get opts and split file in lines
+		[+] get opts and split file in lines
 		[-] make an example code file
-		[-] populate instr metadata
+		[+] populate instr metadata
 		[-] parse instr:
 			[-] decode direction
 			[-] decode mode
@@ -27,8 +30,50 @@ std::map<std::string, std::tuple<int, int, int>> instr = {
 		[-] compute label address if necesary
 */
 
-int main(int argc, char const *argv[])
-{
+void parseLine(std::string &line) {
+	std::cout << line << std::endl;
+}
+
+int parseLineByLine(std::ifstream &in) {
+	if (!in.is_open()) {
+		return 1;
+	}
+
+	std::string line;
+	while (getline(in, line)) {
+		parseLine(line);
+    }
+
+    return 0;
+}
+
+int main(int argc, char const *argv[]) {
+	if (argc < 3) {
+		std::cerr << "Syntax: dcasm <input_file.asm> <output_file.hex>" << std::endl;
+		return 1;
+	}
+
+	std::ifstream in;
+	in.open(argv[1]);
+
+	if (parseLineByLine(in) != 0) {
+		std::cerr << "Could not open input file" << std::endl;
+		return 2;
+	}
+
+	in.close();
+
+
+	std::ofstream out;
+	out.open(argv[2]);
+
+	if (!out.is_open()) {
+		std::cerr << "Could not open output file" << std::endl;
+		return 3;
+	}
+
+	out.close();
+
 	return 0;
 }
 
