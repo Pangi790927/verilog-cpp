@@ -5,6 +5,7 @@
 
 #include "str_helper.h"
 #include "instr_map.h"
+#include "asm_instr.h"
 
 struct Parser {
 	std::vector<AsmInstr> asmInstr;
