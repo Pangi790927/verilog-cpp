@@ -115,18 +115,6 @@ std::map<std::string, std::tuple<int, int, int>> instr_map = {
 		[-] make an example code file
 */
 
-std::vector<std::string> ssplit(const std::string& str,
-		const std::string& delim)
-{
-    std::vector<std::string> tokens;
-    size_t pos = 0;
-    while (pos != std::string::npos) {
-    	size_t prev = pos;
-    	tokens.push_back(str.substr(prev, pos = str.find(delim, prev)));
-    }
-    return tokens;
-}
-
 void parseLine(std::string &line) {
     std::map<std::string, std::tuple<int, int, int>>::iterator it;
     std::string &trimmed = ltrim(line);
@@ -157,10 +145,6 @@ int parseLineByLine(std::ifstream &in) {
 }
 
 int main(int argc, char const *argv[]) {
-	for (auto&& str : ssplit("ana are mere", " "))
-		std::cout << str << std::endl;
-
-
 	if (argc < 3) {
 		std::cerr << "Syntax: dcasm <input_file.asm> <output_file.hex>" << std::endl;
 		return 1;
