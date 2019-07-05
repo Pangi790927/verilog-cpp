@@ -116,19 +116,31 @@ std::map<std::string, std::tuple<int, int, int>> instr_map = {
 */
 
 void parseLine(std::string &line) {
-    std::map<std::string, std::tuple<int, int, int>>::iterator it;
-    std::string &trimmed = ltrim(line);
+    std::string trimmed = trim(line);
+    std::string instr = trimComments(trimmed);
+    auto tokens = ssplit(instr, " \t");
+    std::string command;
 
-    int idx = trimmed.find(" ");
+    if (tokens.size() == 0) {
+    	return ;
+    }
+    command = tokens[0];
+    if (trim(command).size() == 0) {
+    	return ;
+    }
 
-    std::string instr = trimmed.substr(0, idx);
-    it = instr_map.find(instr);
+    auto it = instr_map.find(command);
 
     if (it == instr_map.end()) {
-        std::cerr << "Not a valid instruction: " << instr << std::endl;
-    } else {
-        std::cout << "Found instruction: " << instr << " from line " << trimmed << std::endl;
-    }
+        std::cerr << "Not a valid instruction: " << line << std::endl;
+        return ;
+	}
+
+    std::string args;
+    for (int i = 1; i < tokens.size(); i++)
+    	args += tokens[i];
+
+    std::cout << "split instr: " << command << "$ " << args << "$" << std::endl;
 }
 
 int parseLineByLine(std::ifstream &in) {
