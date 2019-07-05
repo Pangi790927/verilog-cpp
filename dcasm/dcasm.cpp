@@ -2,8 +2,11 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <vector>
 
-std::map<std::string, std::tuple<int, int, int>> instr = {
+#include "str_helper.h"
+
+std::map<std::string, std::tuple<int, int, int>> instr_map = {
 /*    ins      code  addr_mode    op_cnt */
     {"adc",   {0x01, 0b0111'1111, 2       }},
     {"add",   {0x02, 0b0111'1111, 2       }},
@@ -112,8 +115,32 @@ std::map<std::string, std::tuple<int, int, int>> instr = {
 		[-] make an example code file
 */
 
+std::vector<std::string> ssplit(const std::string& str,
+		const std::string& delim)
+{
+    std::vector<std::string> tokens;
+    size_t pos = 0;
+    while (pos != std::string::npos) {
+    	size_t prev = pos;
+    	tokens.push_back(str.substr(prev, pos = str.find(delim, prev)));
+    }
+    return tokens;
+}
+
 void parseLine(std::string &line) {
-	std::cout << line << std::endl;
+    std::map<std::string, std::tuple<int, int, int>>::iterator it;
+    std::string &trimmed = ltrim(line);
+
+    int idx = trimmed.find(" ");
+
+    std::string instr = trimmed.substr(0, idx);
+    it = instr_map.find(instr);
+
+    if (it == instr_map.end()) {
+        std::cerr << "Not a valid instruction: " << instr << std::endl;
+    } else {
+        std::cout << "Found instruction: " << instr << " from line " << trimmed << std::endl;
+    }
 }
 
 int parseLineByLine(std::ifstream &in) {
@@ -130,6 +157,10 @@ int parseLineByLine(std::ifstream &in) {
 }
 
 int main(int argc, char const *argv[]) {
+	for (auto&& str : ssplit("ana are mere", " "))
+		std::cout << str << std::endl;
+
+
 	if (argc < 3) {
 		std::cerr << "Syntax: dcasm <input_file.asm> <output_file.hex>" << std::endl;
 		return 1;
