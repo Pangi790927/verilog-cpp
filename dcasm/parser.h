@@ -57,6 +57,23 @@ struct Parser {
 	    std::cout << "split instr: " << command << "$ " << args << "$" << std::endl;
 	}
 
+	std::string extractLabel(std::string instr) {
+		std::string trimed_instr = trim(instr);
+		auto tok_instr = ssplit(trimed_instr, " \t");
+		if (isLocalLabel(trim(tok_instr[0]))) {
+			return trim(tok_instr[0]).substr(1);
+		}
+		else {
+			trim(tok_instr[0]);
+		}
+	}
+
+	bool isLocalLabel(std::string instr) {
+		if (instr.size() == 0)
+			return false;
+		return instr[0] == '.';
+	}
+
 	bool isLabel(std::string instr) {
 		std::string trimed_instr = trim(instr);
 		auto tok_instr = ssplit(trimed_instr, " \t");
