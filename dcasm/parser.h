@@ -9,6 +9,7 @@
 
 struct Parser {
 	std::vector<Instr> asmInstr;
+	std::string last_label;
 	std::ifstream in;
 	std::ofstream out;
 
@@ -36,8 +37,16 @@ struct Parser {
 	    std::string trimmed = trim(line);
 	    std::string instr = trimComments(trimmed);
 
-	    if (isLabel(line)) {
-	    	asmInstr.push_back(LabelInstr("dummy"));
+	    if (isLabel(instr)) {
+	    	if (isLocalLabel(instr)) {
+	    		if (last_label == "")
+	    			throw std::runtime_error("No label for local label");
+	    		asmInstr.push_back(LabelInstr(extractLabel(instr), last_label));
+	    	}
+	    	else {
+	    		last_label = extractLabel(instr);
+	    		asmInstr.push_back(LabelInstr(last_label));
+	    	}
 	    	return ;
 	    }
 
