@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "str_helper.h"
+#include "asm_instr.h"
 
 std::map<std::string, std::tuple<int, int, int>> instr_map = {
 /*    ins      code  addr_mode    op_cnt */
