@@ -145,7 +145,6 @@ int main(int argc, char const *argv[]) {
 
 	in.close();
 
-
 	std::ofstream out;
 	out.open(argv[2]);
 

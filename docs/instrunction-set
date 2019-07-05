@@ -36,7 +36,7 @@ instructions: (total cnt > 66)
 	POPF
 	PUSHF
 
-	3, 4) * calls: (cnt > 27)
+	3, 4, 5) * calls: (cnt > 27)
 	CALL
 	INT
 	IRET
@@ -46,25 +46,25 @@ instructions: (total cnt > 66)
 	LOOP* ?
 	REP* ?
 
-	5) * compare: (cnt - 2)
+	6) * compare: (cnt - 2)
 	CMP
 	TEST
 
-	6) * misc: (cnt - 2)
+	7) * misc: (cnt - 2)
 	HLT
 	NOP
 
-	7) * io: (cnt - 2)
+	8) * io: (cnt - 2)
 	IN
 	OUT
 
-	8) * mov: (cnt > 2)
-	LDS ?
-	LEA ?
+	9) * mov: (cnt > 2)
 	MOV
 	XCHG
+	LDS ?
+	LEA ?
 	
-	9) * flags: (cnt - 7)
+	10) * flags: (cnt - 7)
 	CLC
 	CLD
 	CLI
