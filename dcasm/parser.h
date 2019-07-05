@@ -8,7 +8,7 @@
 #include "asm_instr.h"
 
 struct Parser {
-	std::vector<Instr> asmInstr;
+	std::vector<Instr *> asmInstr;
 	std::string last_label;
 	std::ifstream in;
 	std::ofstream out;
@@ -41,11 +41,11 @@ struct Parser {
 	    	if (isLocalLabel(instr)) {
 	    		if (last_label == "")
 	    			throw std::runtime_error("No label for local label");
-	    		asmInstr.push_back(LabelInstr(extractLabel(instr), last_label));
+	    		asmInstr.push_back(new LabelInstr(extractLabel(instr), last_label));
 	    	}
 	    	else {
 	    		last_label = extractLabel(instr);
-	    		asmInstr.push_back(LabelInstr(last_label));
+	    		asmInstr.push_back(new LabelInstr(last_label));
 	    	}
 	    	return ;
 	    }
@@ -74,7 +74,7 @@ struct Parser {
 	    	args += tokens[i];
 
 	    std::cout << "split instr: " << command << "$ " << args << "$" << std::endl;
-		asmInstr.push_back(AsmInstr(command, args));
+		asmInstr.push_back(new AsmInstr(command, args));
 	}
 
 	std::string extractLabel(std::string instr) {
