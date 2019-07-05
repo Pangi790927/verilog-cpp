@@ -8,29 +8,39 @@
 #include "asm_instr.h"
 
 struct Parser {
-	std::vector<AsmInstr> asmInstr;
+	std::vector<Instr> asmInstr;
 	std::ifstream in;
 	std::ofstream out;
 
 	Parser (std::string fileIn, std::string fileOut)
 	: in(fileIn.c_str()), out(fileOut.c_str())
 	{
-		if (!fileIn.good())
+		if (!in.good())
 			throw std::runtime_error("could not open input file");
-		if (!fileOut.good())
+		if (!out.good())
 			throw std::runtime_error("could not open output file");
 	}
 
 	void parse() {
 		std::string line;
 		while (getline(in, line)) {
-			asmInstr.push_back(parseLine(line));
+			parseLine(line);
 		}
+
+		// for (auto &ceva : asmInstr) {
+		// 	std::
+		// }
 	}
 
-	AsmInstr parseLine(std::string &line) {
+	void parseLine(std::string &line) {
 	    std::string trimmed = trim(line);
 	    std::string instr = trimComments(trimmed);
+
+	    if (isLabel(line)) {
+	    	asmInstr.push_back(LabelInstr("dummy"));
+	    	return ;
+	    }
+
 	    auto tokens = ssplit(instr, " \t");
 	    std::string command;
 
@@ -45,7 +55,7 @@ struct Parser {
 	    auto it = instr_map.find(command);
 
 	    if (it == instr_map.end()) {
-	        std::cerr <<  << line << std::endl;
+	        std::cerr << line << std::endl;
 	        throw std::runtime_error(
 	        		("Not a valid instruction: " + line).c_str());
 		}
@@ -55,6 +65,7 @@ struct Parser {
 	    	args += tokens[i];
 
 	    std::cout << "split instr: " << command << "$ " << args << "$" << std::endl;
+		asmInstr.push_back(AsmInstr(command, args));
 	}
 
 	std::string extractLabel(std::string instr) {
@@ -91,7 +102,7 @@ struct Parser {
 		if (label_part.size() == 0) {
 			if (trimed_instr.size() == 0)
 				return false;
-			if (trimed_instr[trimed_instr.size() - 1] != ":")
+			if (trimed_instr[trimed_instr.size() - 1] != ':')
 				return false;
 			label_part = trimed_instr.substr(0, trimed_instr.size() - 2);
 		}
@@ -99,7 +110,7 @@ struct Parser {
 			return false;
 		if (isdigit(label_part[0]))
 			return false;
-		std::accepted_chars = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM_1234567890";
+		std::string accepted_chars = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM_1234567890";
 		for (auto&& chr : label_part)
 			if (accepted_chars.find(chr) == std::string::npos)
 				return false;

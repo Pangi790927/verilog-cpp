@@ -1,14 +1,26 @@
 #ifndef ASM_INSTR
 #define ASM_INSTR
 
-struct AsmInstr {
-	std::string instr;
-	std::string args;
+struct Instr
+{
+	// int lineNumber;
 
-	AsmInstr() {};
-	AsmInstr(std::string instr, std::string args) : instr(instr), args(args) {};
+	// Instr() : lineNumber(-1) {}
+	// Instr(int lineNumber) : lineNumber(lineNumber) {}
 };
 
-std::vector<AsmInstr> instructions;
+struct AsmInstr : Instr {
+	std::string instr;
+	std::string args;
+	int wordSize;
+
+	AsmInstr(std::string instr, std::string args) : instr(instr), args(args), wordSize(1) {};
+};
+
+struct LabelInstr : Instr {
+	std::string label;
+
+	LabelInstr(std::string label) : label(label) {};
+};
 
 #endif
