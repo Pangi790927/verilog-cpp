@@ -1,3 +1,6 @@
+#ifndef STR_HELPER_H
+#define STR_HELPER_H
+
 #include <algorithm> 
 #include <functional> 
 #include <cctype>
@@ -48,3 +51,5 @@ static inline std::string trimComments (std::string line) {
 		return tokens[0];
 	return "";
 }
+
+#endif

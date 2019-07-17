@@ -22,7 +22,7 @@
 			[-] decode mode
 			[-] decode registers involved based on mode
 			[-] decode const involved (opt: hex, bin, dec, ?oct?)
-		[-] make an example code file
+		[+] make an example code file
 */
 
 int main(int argc, char const *argv[]) {
