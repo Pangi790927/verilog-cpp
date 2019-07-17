@@ -49,7 +49,10 @@ struct Parser {
 
 			if (auto instr = dynamic_cast<AsmInstr*>(rawInstr)){
 				std::cout << "[instr] " << instr->instr << "\t" << instr->args << std::endl;
+				instr->decode_mode();
 			}
+
+			std::cout << std::endl;
 		}
 
 		std::cout << "=============== SPLIT END ===============" << std::endl;

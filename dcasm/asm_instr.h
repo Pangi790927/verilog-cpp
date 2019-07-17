@@ -33,6 +33,54 @@ struct AsmInstr : Instr {
 			throw std::runtime_error("One of the operands must be a register");
 		}
 	}
+
+	int decode_mode() {
+		auto arg_vec = ssplit(args, ",");
+		if (arg_vec.size() > 2) {
+			throw std::runtime_error("can't have more than 2 operands");
+		}
+
+		if (arg_vec.size() == 0) {
+			return -1; // todo
+		}
+
+		if (arg_vec.size() == 1) {
+			return -1; // todo
+		}
+
+		return decode_two_args();
+	}
+
+	int decode_two_args() {
+		std::cout << "2 arg instr" << std::endl;
+
+		auto arg_vec = ssplit(args, ",");
+		int dir = decode_direction();
+
+		std::string f_arg = (dir == 1) ? trim(arg_vec[0]) : trim(arg_vec[1]);
+		std::string s_arg = (dir == 1) ? trim(arg_vec[1]) : trim(arg_vec[0]);
+
+		/* Check Register mode */
+		if (regs_map.find(f_arg) != regs_map.end() && 
+			regs_map.find(s_arg) != regs_map.end()) {
+
+			std::cout << "Register mode " << f_arg << ", " << s_arg << std::endl;
+			return 0;
+		}
+
+		/* Check Immediate mode */
+		try {
+			unsigned long val = stoll(s_arg, nullptr, 0);
+
+			if (regs_map.find(f_arg) != regs_map.end()) {
+
+				std::cout << "Immediate mode " << f_arg << " <= " << val << std::endl;
+				return 1;
+			}
+		} catch (std::invalid_argument& ignored) {
+
+		}
+	}
 };
 
 struct LabelInstr : Instr {
