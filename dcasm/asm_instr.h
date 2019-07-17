@@ -16,6 +16,7 @@ struct AsmInstr : Instr {
 	std::string instr;
 	std::string args;
 	int wordCount;
+	int free_reg = -1;
 
 	AsmInstr(int line_cnt, std::string instr, std::string args)
 	: Instr(line_cnt), instr(instr), args(args), wordCount(1) {}
@@ -26,12 +27,19 @@ struct AsmInstr : Instr {
 			throw EXCEPTION("can't have more than 2 operands, [at line: %d]", line_cnt);
 		}
 		if (arg_vec.size() <= 1) {
+			if (arg_vec.size() == 1) {
+				if (regs_map.find(trim(arg_vec[1])) != regs_map.end()) {
+					free_reg = regs_map[trim(arg_vec[0])];
+				}
+			}
 			return 0;
 		}
 		if (regs_map.find(trim(arg_vec[1])) != regs_map.end()) {
+			free_reg = regs_map[trim(arg_vec[1])];
 			return 0;
 		}
 		else if (regs_map.find(trim(arg_vec[0])) != regs_map.end()) {
+			free_reg = regs_map[trim(arg_vec[0])];
 			return 1;
 		}
 		else {
