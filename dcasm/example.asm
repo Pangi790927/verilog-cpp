@@ -6,7 +6,7 @@
 
 
 		; abc
-; abc2    
+abc2    
 mov eax, ebx ; comment
 	jmp label
 ; mov eax, ebx ; comment
