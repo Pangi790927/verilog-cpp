@@ -6,7 +6,7 @@
 
 
 		; abc
-abc2    
+; abc2    
 mov eax, ebx ; comment
 	jmp label
 ; mov eax, ebx ; comment
@@ -15,6 +15,7 @@ label:
 	mov [eax +   	 123],			 ebx ; comment
 	jmp eax
 	mov eax, 100
+	mov ebx, 0xFF
 	.local_label:
 	jmp [eax + 322]
 	jmp label
