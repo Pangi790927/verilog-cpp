@@ -1,6 +1,9 @@
 #ifndef ASM_INSTR
 #define ASM_INSTR
 
+#include "regs_map.h"
+#include "str_helper.h"
+
 struct Instr {
 	virtual void polymorfic() {}
 };
@@ -11,6 +14,13 @@ struct AsmInstr : Instr {
 	int wordCount;
 
 	AsmInstr(std::string instr, std::string args) : instr(instr), args(args), wordCount(1) {}
+
+	int decode_direction() {
+		auto arg_vec = ssplit(args, ",");
+		if (arg_vec.size() > 2)
+			throw std::runtime_error("can't have more than 2 operands");
+
+	}
 };
 
 struct LabelInstr : Instr {
