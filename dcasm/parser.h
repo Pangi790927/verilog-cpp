@@ -47,6 +47,7 @@ struct Parser {
 	    		last_label = extractLabel(instr);
 	    		asmInstr.push_back(new LabelInstr(last_label));
 	    	}
+
 	    	return ;
 	    }
 
@@ -113,12 +114,15 @@ struct Parser {
 				return false;
 			if (trimed_instr[trimed_instr.size() - 1] != ':')
 				return false;
-			label_part = trimed_instr.substr(0, trimed_instr.size() - 2);
+			label_part = trimed_instr.substr(0, trimed_instr.size() - 1);
 		}
 		if (label_part.size() == 0)
 			return false;
 		if (isdigit(label_part[0]))
 			return false;
+		if (label_part[0] == '.') {
+			label_part = label_part.substr(1);
+		}
 		std::string accepted_chars = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM_1234567890";
 		for (auto&& chr : label_part)
 			if (accepted_chars.find(chr) == std::string::npos)

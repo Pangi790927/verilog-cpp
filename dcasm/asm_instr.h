@@ -7,14 +7,15 @@ struct Instr
 
 	// Instr() : lineNumber(-1) {}
 	// Instr(int lineNumber) : lineNumber(lineNumber) {}
+	virtual void polymorfic() {}
 };
 
 struct AsmInstr : Instr {
 	std::string instr;
 	std::string args;
-	int wordSize;
+	int wordCount;
 
-	AsmInstr(std::string instr, std::string args) : instr(instr), args(args), wordSize(1) {}
+	AsmInstr(std::string instr, std::string args) : instr(instr), args(args), wordCount(1) {}
 };
 
 struct LabelInstr : Instr {
