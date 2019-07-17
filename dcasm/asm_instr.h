@@ -1,12 +1,7 @@
 #ifndef ASM_INSTR
 #define ASM_INSTR
 
-struct Instr
-{
-	// int lineNumber;
-
-	// Instr() : lineNumber(-1) {}
-	// Instr(int lineNumber) : lineNumber(lineNumber) {}
+struct Instr {
 	virtual void polymorfic() {}
 };
 
