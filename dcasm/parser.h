@@ -28,9 +28,16 @@ struct Parser {
 			parseLine(line);
 		}
 
-		// for (auto &ceva : asmInstr) {
-		// 	std::
-		// }
+		for (auto &rawInstr : asmInstr) {
+			if (auto label = dynamic_cast<LabelInstr*>(rawInstr)){
+				std::cout << label->label << std::endl;
+			}
+
+			if (auto instr = dynamic_cast<AsmInstr*>(rawInstr)){
+				// kitty is not nullptr
+				std::cout << instr->args << std::endl;
+			}
+		}
 	}
 
 	void parseLine(std::string &line) {
