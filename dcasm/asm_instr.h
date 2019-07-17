@@ -7,6 +7,7 @@ struct Instr
 
 	// Instr() : lineNumber(-1) {}
 	// Instr(int lineNumber) : lineNumber(lineNumber) {}
+
 	virtual void polymorfic() {}
 };
 
