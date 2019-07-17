@@ -6,6 +6,7 @@
 #include "str_helper.h"
 #include "instr_map.h"
 #include "asm_instr.h"
+#include "debug.h"
 
 struct Parser {
 	std::vector<Instr *> asmInstr;
@@ -17,17 +18,18 @@ struct Parser {
 	: in(fileIn.c_str()), out(fileOut.c_str())
 	{
 		if (!in.good())
-			throw std::runtime_error("could not open input file");
+			throw EXCEPTION("could not open input file");
 		if (!out.good())
-			throw std::runtime_error("could not open output file");
+			throw EXCEPTION("could not open output file");
 	}
 
 	void parse() {
 		std::string line;
+		int line_cnt = 1;
 
 		std::cout << "============= PARSING BEGIN =============" << std::endl;
 		while (getline(in, line)) {
-			parseLine(line);
+			parseLine(line, line_cnt++);
 		}
 		std::cout << "============== PARSING END ==============" << std::endl;
 
@@ -55,19 +57,20 @@ struct Parser {
 		std::cout << "=============== SPLIT END ===============" << std::endl;
 	}
 
-	void parseLine(std::string &line) {
+	void parseLine(std::string &line, int line_cnt) {
 	    std::string trimmed = trim(line);
 	    std::string instr = trimComments(trimmed);
 
 	    if (isLabel(instr)) {
 	    	if (isLocalLabel(instr)) {
 	    		if (last_label == "")
-	    			throw std::runtime_error("No label for local label");
-	    		asmInstr.push_back(new LabelInstr(extractLabel(instr), last_label));
+	    			throw EXCEPTION("No label for local label, [at line: %d]", line_cnt);
+	    		asmInstr.push_back(new LabelInstr(line_cnt,
+	    				extractLabel(instr), last_label));
 	    	}
 	    	else {
 	    		last_label = extractLabel(instr);
-	    		asmInstr.push_back(new LabelInstr(last_label));
+	    		asmInstr.push_back(new LabelInstr(line_cnt, last_label));
 	    	}
 
 	    	return ;
@@ -88,8 +91,8 @@ struct Parser {
 
 	    if (it == instr_map.end()) {
 	        std::cerr << line << std::endl;
-	        throw std::runtime_error(
-	        		("Not a valid instruction: " + line).c_str());
+	        throw EXCEPTION("Not a valid instruction: %s [at line: %d]",
+	        		line.c_str(), line_cnt);
 		}
 
 	    std::string args;
@@ -97,7 +100,7 @@ struct Parser {
 	    	args += tokens[i];
 
 	    std::cout << "split instr: " << command << "$ " << args << "$" << std::endl;
-		asmInstr.push_back(new AsmInstr(command, args));
+		asmInstr.push_back(new AsmInstr(line_cnt, command, args));
 	}
 
 	std::string extractLabel(std::string instr) {
