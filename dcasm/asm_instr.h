@@ -17,9 +17,21 @@ struct AsmInstr : Instr {
 
 	int decode_direction() {
 		auto arg_vec = ssplit(args, ",");
-		if (arg_vec.size() > 2)
+		if (arg_vec.size() > 2) {
 			throw std::runtime_error("can't have more than 2 operands");
-
+		}
+		if (arg_vec.size() <= 1) {
+			return 0;
+		}
+		if (regs_map.find(trim(arg_vec[1])) != regs_map.end()) {
+			return 0;
+		}
+		else if (regs_map.find(trim(arg_vec[0])) != regs_map.end()) {
+			return 1;
+		}
+		else {
+			throw std::runtime_error("One of the operands must be a register");
+		}
 	}
 };
 
