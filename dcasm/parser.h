@@ -24,20 +24,35 @@ struct Parser {
 
 	void parse() {
 		std::string line;
+
+		std::cout << "============= PARSING BEGIN =============" << std::endl;
 		while (getline(in, line)) {
 			parseLine(line);
 		}
+		std::cout << "============== PARSING END ==============" << std::endl;
+
+		splitInstructions();
+	}
+
+	void splitInstructions() {
+		std::cout << "============== SPLIT BEGIN ==============" << std::endl;
 
 		for (auto &rawInstr : asmInstr) {
 			if (auto label = dynamic_cast<LabelInstr*>(rawInstr)){
-				std::cout << label->label << std::endl;
+				if (label->parrent.compare("") == 0) {
+					std::cout << "[global label] " << label->label << std::endl;
+				}
+				else {
+					std::cout << "[local label] " << label->label << std::endl;
+				}
 			}
 
 			if (auto instr = dynamic_cast<AsmInstr*>(rawInstr)){
-				// kitty is not nullptr
-				std::cout << instr->args << std::endl;
+				std::cout << "[instr] " << instr->instr << "\t" << instr->args << std::endl;
 			}
 		}
+
+		std::cout << "=============== SPLIT END ===============" << std::endl;
 	}
 
 	void parseLine(std::string &line) {
