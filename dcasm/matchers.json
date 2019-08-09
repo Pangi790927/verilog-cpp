@@ -1,9 +1,9 @@
 {
 	"comment": "\\;(.*)",
-	"local_label": "",
-	"label": "",
+	"local_label": "[\\ \\t]*\\.([_a-zA-Z]+[_a-zA-Z0-9]*):[\\ \\t]{0,}\\;?",
+	"label": "^[\\ \\t]*([_a-zA-Z]+[_a-zA-Z0-9]*):[\\ \\t]{0,}\\;?",
 	"instr": "",
-	"instr_op": "",
+	"instr_op": "^[\\ \\t]*(__INSTR__)[\\ \\t]*((__REGS__)|([_a-zA-Z]+[_a-zA-Z0-9]*)|(.[_a-zA-Z]+[_a-zA-Z0-9]*)|(\\[[a-zA-Z0-9\\ \\+]+\\]))[\\ \\t]*$",
 	"instr_re_op": "",
 	"instr_op_re": "",
 	"dir0": "",
