@@ -85,6 +85,14 @@ adress-mode:
 	5) MOV AX, [SI+2000]		Indexed mode
 	6) MOV AL, [SI+BP+2000]		Based indexed displacement mode
 
+	{REGS}|
+	{NUMBER|LABEL}|
+	{[NUMBER]}|
+	{[REGS]}|
+	{[REGS{SPACE}+{SPACE}REGS]}|
+	{[REGS{SPACE}+{SPACE}{NUMBER}]}|
+	{[REGS{SPACE}+{SPACE}REGS{SPACE}+{SPACE}{NUMBER}]}
+
 	or:
 	MOV [SI+BP+2000], AL
 

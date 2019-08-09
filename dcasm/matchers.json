@@ -2,5 +2,9 @@
 	"comment": "\\;(.*)",
 	"local_label": "",
 	"label": "",
-	"instr": ""
+	"instr": "",
+	"instr_op": "",
+	"instr_re_op": "",
+	"instr_op_re": "",
+	"dir": ""
 }

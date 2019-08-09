@@ -10,6 +10,13 @@
 #include "debug.h"
 #include "json.h"
 
+// instr		{space}__CMD__{space}
+// instr_op		{space}__CMD__{space}__DIRECTION__{space}
+// instr_re_op 	{space}__CMD__{space}__REGS__{,}__DIRECTION__{space}
+// instr_op_re 	{space}__CMD__{space}__DIRECTION__{,}__REGS__{space}
+// direction_re	{...}
+
+
 #define GET_STR(jobj, str)\
 ([&]() -> std::string {\
 	if (jobj.find(str) != jobj.end()) {\
