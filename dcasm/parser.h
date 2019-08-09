@@ -3,8 +3,6 @@
 
 #include <vector>
 #include <regex>
-#include <string>
-#include <sstream>
 
 #include "str_helper.h"
 #include "instr_map.h"
@@ -58,17 +56,11 @@ struct Parser {
 	}
 
 	void parse() {
-		std::string all_file((std::istreambuf_iterator<char>(in)),
-                 std::istreambuf_iterator<char>());
-		std::regex comment_multi_regex(GET_STR(j_match, "comment_multi"));
-		all_file = std::regex_replace(all_file, comment_multi_regex, "");
-		std::stringstream all_stream(all_file);
-
 		std::string line;
 		int line_cnt = 1;
 
 		std::cout << "============= PARSING BEGIN =============" << std::endl;
-		while (getline(all_stream, line)) {
+		while (getline(in, line)) {
 			parseLine(line, line_cnt++);
 		}
 		std::cout << "============== PARSING END ==============" << std::endl;
@@ -77,7 +69,7 @@ struct Parser {
 	}
 
 	void parseLine(std::string &line, int line_cnt) {
-		std::regex comment_regex(GET_STR(j_match, "comment"));
+	    std::regex comment_regex(GET_STR(j_match, "comment"));
 		line = std::regex_replace(line, comment_regex, "");
 
 
