@@ -23,4 +23,12 @@ label:
 
 label2:
 	jmp .local_label
-	.local_label:
+	.local_label    :
+
+; match
+; extrct
+
+; "matches" : {
+	; "local_label": "{space}{.}{[_a-zA-Z][_a-z,A-Z,0-9]+}{space}+{:}{space}"
+; }
+; as.s.sad..d

@@ -2,25 +2,57 @@
 #define PARSER_H
 
 #include <vector>
+#include <regex>
 
 #include "str_helper.h"
 #include "instr_map.h"
 #include "asm_instr.h"
 #include "debug.h"
+#include "json.h"
+
+#define GET_STR(jobj, str)\
+([&]() -> std::string {\
+	if (jobj.find(str) != jobj.end()) {\
+		return jobj[str].get<std::string>();\
+	}\
+	return "";\
+}())\
+
+#define GET_INT(jobj, str)\
+([&]() -> int {\
+	if (jobj.find(str) != jobj.end()) {\
+		return std::stoi(jobj[str].get<std::string>());\
+	}\
+}())\
 
 struct Parser {
 	std::vector<Instr *> asmInstr;
 	std::string last_label;
 	std::ifstream in;
 	std::ofstream out;
+	nlohmann::json j_instr;
+	nlohmann::json j_regs;
+	nlohmann::json j_match;
 
 	Parser (std::string fileIn, std::string fileOut)
 	: in(fileIn.c_str()), out(fileOut.c_str())
 	{
+		std::ifstream in_regs("regs.json");
+		std::ifstream in_instr("instr.json");
+		std::ifstream in_match("matchers.json");
 		if (!in.good())
 			throw EXCEPTION("could not open input file");
 		if (!out.good())
 			throw EXCEPTION("could not open output file");
+		if (!in_regs.good())
+			throw EXCEPTION("could not open input file regs");
+		if (!in_instr.good())
+			throw EXCEPTION("could not open input file instr");
+		if (!in_match.good())
+			throw EXCEPTION("could not open input file matchers");
+		in_regs >> j_regs;
+		in_instr >> j_instr;
+		in_match >> j_match;
 	}
 
 	void parse() {
@@ -36,31 +68,13 @@ struct Parser {
 		splitInstructions();
 	}
 
-	void splitInstructions() {
-		std::cout << "============== SPLIT BEGIN ==============" << std::endl;
-
-		for (auto &rawInstr : asmInstr) {
-			if (auto label = dynamic_cast<LabelInstr*>(rawInstr)){
-				if (label->parrent.compare("") == 0) {
-					std::cout << "[global label] " << label->label << std::endl;
-				}
-				else {
-					std::cout << "[local label] " << label->label << std::endl;
-				}
-			}
-
-			if (auto instr = dynamic_cast<AsmInstr*>(rawInstr)){
-				std::cout << "[instr] " << instr->instr << "\t" << instr->args << std::endl;
-				instr->decode_mode();
-			}
-
-			std::cout << std::endl;
-		}
-
-		std::cout << "=============== SPLIT END ===============" << std::endl;
-	}
-
 	void parseLine(std::string &line, int line_cnt) {
+	    std::regex comment_regex(GET_STR(j_match, "comment"));
+	    std::cout << "with comments: " << line << std::endl;
+	   	line = std::regex_replace(line, comment_regex, "");
+	    std::cout << "without comments: " << line << std::endl;
+	    return ;
+
 	    std::string trimmed = trim(line);
 	    std::string instr = trimComments(trimmed);
 
@@ -105,6 +119,32 @@ struct Parser {
 	    std::cout << "split instr: " << command << "$ " << args << "$" << std::endl;
 		asmInstr.push_back(new AsmInstr(line_cnt, command, args));
 	}
+
+	void splitInstructions() {
+		std::cout << "============== SPLIT BEGIN ==============" << std::endl;
+
+		for (auto &rawInstr : asmInstr) {
+			if (auto label = dynamic_cast<LabelInstr*>(rawInstr)){
+				if (label->parrent.compare("") == 0) {
+					std::cout << "[global label] " << label->label << std::endl;
+				}
+				else {
+					std::cout << "[local label] " << label->label << std::endl;
+				}
+			}
+
+			if (auto instr = dynamic_cast<AsmInstr*>(rawInstr)){
+				std::cout << "[instr] " << instr->instr << "\t" << instr->args << std::endl;
+				instr->decode_mode();
+			}
+
+			std::cout << std::endl;
+		}
+
+		std::cout << "=============== SPLIT END ===============" << std::endl;
+	}
+
+	
 
 	std::string extractLabel(std::string instr) {
 		std::string trimed_instr = trim(instr);
