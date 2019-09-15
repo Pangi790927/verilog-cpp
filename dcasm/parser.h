@@ -76,7 +76,7 @@ struct Parser {
 	}
 
 	void parseLine(std::string &line, int line_cnt) {
-	    std::regex comment_regex(GET_STR(j_match, "comment"));
+		std::regex comment_regex(GET_STR(j_match, "comment"));
 		line = std::regex_replace(line, comment_regex, "");
 
 
