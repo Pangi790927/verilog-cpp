@@ -91,25 +91,28 @@ struct Parser {
 	}
 
 	void expand_regs() {
+		using namespace nlohmann;
 		std::string reg_regex = "(";
-		for (auto&& reg : j_regs) {
-			reg_regex += reg.get<std::string>() + "|";
+		for (auto&& [reg, val] : j_regs.get<json::object_t>()) {
+			reg_regex += reg + "|";
 		}
 		j_match["macro"]["__REGS__"] =
 				reg_regex.substr(0, reg_regex.size() - 1) + ")";
 	}
 
 	void expand_instrs() {
+		using namespace nlohmann;
 		std::string reg_instr = "(";
-		for (auto&& instr : j_regs) {
-			reg_instr += instr.get<std::string>() + "|";
+		for (auto&& [instr, val] : j_instr.get<json::object_t>()) {
+			reg_instr += instr + "|";
 		}
 		j_match["macro"]["__INSTRS__"] =
 				reg_instr.substr(0, reg_instr.size() - 1) + ")";
 	}
 
 	bool needs_expansion(const std::string& reg_expr) {
-		for (auto&& macro : j_match["macro"]) {
+		using namespace nlohmann;
+		for (auto&& [key, macro] : j_match["macro"].get<json::object_t>()) {
 			if (macro.get<std::string>().find(reg_expr) != std::string::npos) {
 				return true;
 			}
@@ -120,7 +123,9 @@ struct Parser {
 	void expand_macro(const std::string& macro, std::set<std::string> in_exp) {
 		using namespace nlohmann;
 		for (auto&& [key, val] : j_match["macro"].get<json::object_t>()) {
-			if (macro.find(key) != std::string::npos) {
+			if (j_match["macro"][macro].get<std::string>().find(key) !=
+					std::string::npos)
+			{
 				if (needs_expansion(key)) {
 					if (in_exp.find(key) != in_exp.end()) {
 						throw std::runtime_error("recursive macro expansion");
@@ -146,10 +151,7 @@ struct Parser {
 			if (needs_expansion(val.get<std::string>())) {
 				std::set<std::string> in_expansion;
 				in_expansion.insert(key);
-				printf("Will expand: %s\n", key.c_str());
 				expand_macro(key, in_expansion);
-				printf("expanded: %s\n", j_match["macro"][key].
-						get<std::string>().c_str());
 			}
 		}
 	}
