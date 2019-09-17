@@ -34,13 +34,14 @@
 }())\
 
 struct Parser {
-	std::vector<Instr *> asmInstr;
 	std::string last_label;
 	std::ifstream in;
 	std::ofstream out;
 	nlohmann::json j_instr;
 	nlohmann::json j_regs;
 	nlohmann::json j_match;
+	std::map<std::string, AsmInstr&> label_map;
+	std::vector<AsmInstr> asm_instr;
 
 	Parser (std::string fileIn, std::string fileOut)
 	: in(fileIn.c_str()), out(fileOut.c_str())
@@ -82,6 +83,7 @@ struct Parser {
 		while (getline(in, line)) {
 			parseLine(line, line_cnt++);
 		}
+		///
 		std::cout << "============== PARSING END ==============" << std::endl;
 	}
 
@@ -118,7 +120,7 @@ struct Parser {
 			printf("instr 2op:   %s\n", ltrim(line).c_str());
 		}
 
-		asmInstr.emplace_back(line, dir, label, line, word_cnt, addr)
+		// asmInstr.emplace_back(line, dir, label, line, word_cnt, addr)
 		// asmInstr.push_back(new AsmInstr(line_cnt, command, args));
 		return ;
 	}
@@ -202,10 +204,6 @@ struct Parser {
 						replaceAll(new_str, macro_key, macro.get<std::string>());
 						// printf("new: %s\n", new_str.c_str());
 						j_match[key] = new_str;
-						printf("key: %s\n", key.c_str());
-						printf("replaced: %s\n", macro_key.c_str());
-						printf("with: %s\n", macro.get<std::string>().c_str());
-						printf("new_str: %s\n", new_str.c_str());
 					}
 				}
 			}

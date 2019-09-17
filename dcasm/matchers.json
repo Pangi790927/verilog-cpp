@@ -2,8 +2,8 @@
 	"macro": {
 		"__SPACE__": "[\\ \\t]",
 		"__SPACES__": "[\\ \\t]*",
-		"__LABEL__": "[_a-zA-Z]+[_a-zA-Z0-9]*",
-		"__LOCAL_LB__": "\\.[_a-zA-Z]+[_a-zA-Z0-9]*",
+		"__LABEL__": "((?!__REGS__[^_a-zA-Z0-9]+)([_a-zA-Z]+[_a-zA-Z0-9]*))",
+		"__LOCAL_LB__": "(\\.(?!__REGS__[^_a-zA-Z0-9]+)([_a-zA-Z]+[_a-zA-Z0-9]*))",
 		"__NUMBER__": "(([0-9]|[a-f]|[A-F])+(h|H)|(0x([0-9]|[a-f]|[A-F])+)|([0-9]+))",
 		"__CONSTANT__": "(__NUMBER__|__LOCAL_LB__|__LABEL__)",
 		"__MOD0__": "__REGS__",
@@ -21,5 +21,5 @@
 	"instr": "^__SPACES__(__INSTRS__)__SPACES__$",
 	"instr_op": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__COMPOSED__)__SPACES__$",
 	"instr_re_op": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__REGS__)__SPACES__\\,__SPACES__(__COMPOSED__)__SPACES__$",
-	"instr_op_re": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__COMPOSED__)__SPACES__\\,__SPACES__(__REGS__)__SPACES__$",
+	"instr_op_re": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__COMPOSED__)__SPACES__\\,__SPACES__(__REGS__)__SPACES__$"
 }
