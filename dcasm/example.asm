@@ -1,4 +1,3 @@
-__main__:
 ; this is only a comment
  ; this is only a comment
     ; this is only a comment
