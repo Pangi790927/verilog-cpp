@@ -19,7 +19,9 @@ label:
 	.local_label:
 	jmp [eax + 322]
 	jmp label
+	not .local_label
 	jmp .local_label
+	hlt
 
 label2:
 	jmp .local_label

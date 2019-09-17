@@ -67,6 +67,11 @@ struct Parser {
 		for (auto&& [key, val] : j_match["macro"].get<json::object_t>()) {
 			printf("[%s] = %s\n", key.c_str(), val.get<std::string>().c_str());
 		}
+		for (auto&& [key, val] : j_match.get<json::object_t>()) {
+			if (key != "macro")
+				printf("[%s] = %s\n", key.c_str(),
+						val.get<std::string>().c_str());
+		}
 	}
 
 	void parse() {
@@ -84,10 +89,38 @@ struct Parser {
 		std::regex comment_regex(GET_STR(j_match, "comment"));
 		line = std::regex_replace(line, comment_regex, "");
 
+		static std::regex label_re(GET_STR(j_match, "label"));
+		static std::regex local_re(GET_STR(j_match, "local_label"));
+		static std::regex instr0_re(GET_STR(j_match, "instr"));
+		static std::regex instr1_re(GET_STR(j_match, "instr_op"));
+		static std::regex instr2or_re(GET_STR(j_match, "instr_op_re"));
+		static std::regex instr2ro_re(GET_STR(j_match, "instr_re_op"));
 
+		if (std::regex_match(line, label_re)) {
+			printf("label:       %s\n", ltrim(line).c_str());
+		}
 
-		return ;
+		if (std::regex_match(line, local_re)) {
+			printf("local label: %s\n", ltrim(line).c_str());
+		}
+
+		if (std::regex_match(line, instr0_re)) {
+			printf("instr 0op:   %s\n", ltrim(line).c_str());
+		}
+
+		if (std::regex_match(line, instr1_re)) {
+			printf("instr 1op:   %s\n", ltrim(line).c_str());
+		}
+
+		if (std::regex_match(line, instr2ro_re) ||
+				std::regex_match(line, instr2or_re))
+		{
+			printf("instr 2op:   %s\n", ltrim(line).c_str());
+		}
+
+		asmInstr.emplace_back(line, dir, label, line, word_cnt, addr)
 		// asmInstr.push_back(new AsmInstr(line_cnt, command, args));
+		return ;
 	}
 
 	void expand_regs() {
@@ -152,6 +185,29 @@ struct Parser {
 				std::set<std::string> in_expansion;
 				in_expansion.insert(key);
 				expand_macro(key, in_expansion);
+			}
+		}
+		for (auto&& [key, _] : j_match.get<json::object_t>()) {
+			if (key != "macro") {
+				for (auto&& [macro_key, macro] : j_match["macro"].
+						get<json::object_t>())
+				{
+					auto val = j_match[key];
+					if (val.get<std::string>().find(macro_key) !=
+							std::string::npos)
+					{
+						// printf("%s\n", val.get<std::string>().c_str());
+						std::string new_str = val.get<std::string>();
+						// printf("new: %s\n", new_str.c_str());
+						replaceAll(new_str, macro_key, macro.get<std::string>());
+						// printf("new: %s\n", new_str.c_str());
+						j_match[key] = new_str;
+						printf("key: %s\n", key.c_str());
+						printf("replaced: %s\n", macro_key.c_str());
+						printf("with: %s\n", macro.get<std::string>().c_str());
+						printf("new_str: %s\n", new_str.c_str());
+					}
+				}
 			}
 		}
 	}
