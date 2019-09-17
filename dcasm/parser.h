@@ -40,6 +40,13 @@ struct Parser {
 	nlohmann::json j_instr;
 	nlohmann::json j_regs;
 	nlohmann::json j_match;
+	std::regex label_re;
+	std::regex local_re;
+	std::regex instr0_re;
+	std::regex instr1_re;
+	std::regex instr2or_re;
+	std::regex instr2ro_re;
+
 	std::map<std::string, AsmInstr&> label_map;
 	std::vector<AsmInstr> asm_instr;
 
@@ -73,6 +80,13 @@ struct Parser {
 				printf("[%s] = %s\n", key.c_str(),
 						val.get<std::string>().c_str());
 		}
+
+		label_re = std::regex(GET_STR(j_match, "label"));
+		local_re = std::regex(GET_STR(j_match, "local_label"));
+		instr0_re = std::regex(GET_STR(j_match, "instr"));
+		instr1_re = std::regex(GET_STR(j_match, "instr_op"));
+		instr2or_re = std::regex(GET_STR(j_match, "instr_op_re"));
+		instr2ro_re = std::regex(GET_STR(j_match, "instr_re_op"));
 	}
 
 	void parse() {
@@ -91,12 +105,8 @@ struct Parser {
 		std::regex comment_regex(GET_STR(j_match, "comment"));
 		line = std::regex_replace(line, comment_regex, "");
 
-		static std::regex label_re(GET_STR(j_match, "label"));
-		static std::regex local_re(GET_STR(j_match, "local_label"));
-		static std::regex instr0_re(GET_STR(j_match, "instr"));
-		static std::regex instr1_re(GET_STR(j_match, "instr_op"));
-		static std::regex instr2or_re(GET_STR(j_match, "instr_op_re"));
-		static std::regex instr2ro_re(GET_STR(j_match, "instr_re_op"));
+
+
 
 		if (std::regex_match(line, label_re)) {
 			printf("label:       %s\n", ltrim(line).c_str());
