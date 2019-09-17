@@ -102,37 +102,33 @@ struct Parser {
 	}
 
 	void parseLine(std::string &line, int line_cnt) {
-		std::regex comment_regex(GET_STR(j_match, "comment"));
+		static std::regex comment_regex(GET_STR(j_match, "comment"));
+		static std::regex constant_regex(GET_STR(j_match, "__CONSTANT__"));
 		line = std::regex_replace(line, comment_regex, "");
 
+		bool is_label = std::regex_match(line, label_re);
+		bool is_local = std::regex_match(line, local_re);
+		bool is_instr0 = std::regex_match(line, instr0_re);
+		bool is_instr1 = std::regex_match(line, instr1_re);
+		bool is_op_re = std::regex_match(line, instr2or_re);
+		bool is_re_op = std::regex_match(line, instr2ro_re);
 
+		static uint32_t current_addr = 0;
+		static std::string curr_label = "__main_file_label__";
+		bool has_constant = std::regex_search(line, constant_regex);
 
-
-		if (std::regex_match(line, label_re)) {
-			printf("label:       %s\n", ltrim(line).c_str());
-		}
-
-		if (std::regex_match(line, local_re)) {
-			printf("local label: %s\n", ltrim(line).c_str());
-		}
-
-		if (std::regex_match(line, instr0_re)) {
-			printf("instr 0op:   %s\n", ltrim(line).c_str());
-		}
-
-		if (std::regex_match(line, instr1_re)) {
-			printf("instr 1op:   %s\n", ltrim(line).c_str());
-		}
-
-		if (std::regex_match(line, instr2ro_re) ||
-				std::regex_match(line, instr2or_re))
-		{
-			printf("instr 2op:   %s\n", ltrim(line).c_str());
-		}
-
-		// asmInstr.emplace_back(line, dir, label, line, word_cnt, addr)
-		// asmInstr.push_back(new AsmInstr(line_cnt, command, args));
-		return ;
+		AsmInstr instr = {
+			.is_label = is_label,
+			.is_local = is_local,
+			.is_instr = is_instr0 || is_instr1 || is_re_op || is_op_re,
+			.dir = is_re_op, // all other are direction 0
+			.parrent_label = curr_label,
+			.line = line,
+			.word_cnt = !(is_local || is_label) ? 1 + has_constant : 0,
+			.addr = current_addr
+		};
+		current_addr += instr.word_cnt * 4;
+		asm_instr.push_back(instr);
 	}
 
 	void expand_regs() {

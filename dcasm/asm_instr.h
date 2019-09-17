@@ -17,7 +17,7 @@ struct AsmInstr {
 	std::string parrent_label;
 	std::string line;
 	int word_cnt;
-	int addr;
+	uint32_t addr;
 };
 
 #endif
