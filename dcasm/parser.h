@@ -47,8 +47,8 @@ struct Parser {
 	std::regex instr2or_re;
 	std::regex instr2ro_re;
 
-	std::map<std::string, AsmInstr&> label_map;
-	std::vector<AsmInstr> asm_instr;
+	std::map<std::string, AsmInstr *> label_map;
+	std::vector<std::shared_ptr<AsmInstr>> asm_instr;
 
 	Parser (std::string fileIn, std::string fileOut)
 	: in(fileIn.c_str()), out(fileOut.c_str())
@@ -142,7 +142,12 @@ struct Parser {
 
 	void parseLine(std::string &line, int line_cnt) {
 		static std::regex comment_regex(GET_STR(j_match, "comment"));
-		static std::regex constant_regex(GET_STR(j_match, "__CONSTANT__"));
+		static std::regex constant_regex(
+				GET_STR(j_match["macro"], "__CONSTANT__"));
+		static std::regex local_regex(
+				GET_STR(j_match["macro"], "__LOCAL_LB__"));
+		static std::regex label_regex(
+				GET_STR(j_match["macro"], "__LABEL__"));
 		line = std::regex_replace(line, comment_regex, "");
 
 		bool is_label = std::regex_match(line, label_re);
@@ -156,6 +161,14 @@ struct Parser {
 		static std::string curr_label = "__main_file_label__";
 		bool has_constant = std::regex_search(line, constant_regex);
 
+		std::smatch sm_label;
+		std::smatch sm_local;
+		std::regex_search(line, sm_label, label_regex);
+		std::regex_search(line, sm_local, local_regex);
+
+		if (is_label)
+			curr_label = sm_label.str();
+
 		AsmInstr instr = {
 			.is_label = is_label,
 			.is_local = is_local,
@@ -167,7 +180,13 @@ struct Parser {
 			.addr = current_addr
 		};
 		current_addr += instr.word_cnt * 4;
-		asm_instr.push_back(instr);
+		asm_instr.emplace_back(new AsmInstr(instr));
+		if (is_label) {
+			label_map[sm_label.str()] = asm_instr.back().get();
+		}
+		if (is_local) {
+			label_map[curr_label + sm_local.str()] = asm_instr.back().get();
+		}
 	}
 
 	void expand_regs() {
