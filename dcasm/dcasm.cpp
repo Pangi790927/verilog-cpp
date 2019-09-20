@@ -34,6 +34,7 @@ int main(int argc, char const *argv[]) {
 	try {
 		Parser parser(argv[1], argv[2]);
 		parser.parse();
+		parser.translate();
 	}
 	catch (std::exception& err) {
 		std::cout << "Exception while parsing: " << err.what() << std::endl;
