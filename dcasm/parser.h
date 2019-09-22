@@ -90,7 +90,6 @@ struct Parser {
 		while (getline(in, line)) {
 			parseLine(line, line_cnt++);
 		}
-		///
 		std::cout << "============== PARSING END ==============" << std::endl;
 	}
 
@@ -118,6 +117,12 @@ struct Parser {
 			{
 				static std::regex instr_regex(
 						GET_STR(j_match["macro"], "__INSTRS__"));
+				static std::regex reg_regex(
+						GET_STR(j_match["macro"], "__REGS__"));
+				static std::regex comp_regex(
+						GET_STR(j_match["macro"], "__COMPOSED__"));
+				static std::regex const_regex(
+						GET_STR(j_match["macro"], "__CONSTANT__"));
 
 				std::regex_search(instr->line, match, instr_regex);
 				std::string instr_alias = match.str(0);
@@ -128,24 +133,57 @@ struct Parser {
 
 				instruction.op = code;			// append instruction code
 				instruction.dir = instr->dir;	// append direction
+				
+				std::string rest = match.suffix();
+				uint32_t const_val = 0;
+				bool has_const = false;
 
-    			if (instr->is_instr0) {
-					std::cout << "0-arg instruction " << instr->line << std::endl;
-    			}
+				if (instr->is_instr0) {
+					; // nothing more to do
+				}
+				else if (instr->is_instr1) {
+					std::regex_search(rest, match, comp_regex);
+					std::string comp = match.str();
+					if (std::regex_search(comp, match, const_regex)) {
+						has_const = true;
+						const_val = find_const(match.str());
+					}
+					instruction.mod = find_mode(comp);
+					instruction.reg1 = find_reg1(comp);
+					instruction.reg2 = find_reg2(comp);
+				}
+				else if (instr->is_instr2 && instr->dir == 0) {
+					std::regex_search(rest, match, comp_regex);
+					std::string comp = match.str();
+					std::string rest2 = match.suffix().str();
+					std::regex_search(rest2, match, reg_regex);
+					instruction.reg = find_reg(match.str());
 
-    			if (instr->is_instr1) {
-					std::cout << "1-arg instruction " << instr->line << std::endl;
-    			}
+					if (std::regex_search(comp, match, const_regex)) {
+						has_const = true;
+						const_val = find_const(match.str());
+					}
+					instruction.mod = find_mode(comp);
+					instruction.reg1 = find_reg1(comp);
+					instruction.reg2 = find_reg2(comp);
+				}
+				else if (instr->is_instr2 && instr->dir == 1) {
+					std::regex_search(rest, match, reg_regex);
+					instruction.reg = find_reg(match.str());
+					std::string rest2 = match.suffix().str();
+					std::regex_search(rest2, match, comp_regex);
+					std::string comp = match.str();
 
-    			if (instr->is_instr2 && instr->dir == 0) {
-					std::cout << "2-arg [compl, reg]" << instr->line << std::endl;
-    			}
+					if (std::regex_search(comp, match, const_regex)) {
+						has_const = true;
+						const_val = find_const(match.str());
+					}
+					instruction.mod = find_mode(comp);
+					instruction.reg1 = find_reg1(comp);
+					instruction.reg2 = find_reg2(comp);
 
-    			if (instr->is_instr2 && instr->dir == 1) {
-					std::cout << "2-arg [reg, compl]" << instr->line << std::endl;
-    			}
-				std::cout << "Code for instr: " << instr_code
-						<< " => " << code << std::endl;					
+				}
+				std::cout << "Code for instr: " << instr->line << std::endl;
 				std::cout << instruction.to_string() << std::endl;
 			}
 		}
@@ -212,6 +250,28 @@ struct Parser {
 		if (is_local) {
 			label_map[curr_label + sm_local.str()] = asm_instr.back().get();
 		}
+	}
+
+	uint32_t find_mode(std::string comp) {
+
+	}
+
+	uint32_t find_reg(std::string reg_part) {
+
+	}
+
+	uint32_t find_reg1(std::string comp) {
+
+	}
+
+	uint32_t find_reg2(std::string comp) {
+
+	}
+
+	uint32_t find_const(std::string const_str) {
+		static std::regex label_regex(GET_STR(j_match["macro"], "__LABEL__"));		
+		static std::regex local_regex(GET_STR(j_match["macro"], "__LOCAL_LB__"));		
+		static std::regex number_regex(GET_STR(j_match["macro"], "__NUMBER__"));		
 	}
 
 	void expand_regs() {
