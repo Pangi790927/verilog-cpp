@@ -1,6 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <bitset>
 #include <vector>
 #include <regex>
 #include <set>
@@ -91,6 +92,52 @@ struct Parser {
 		}
 		///
 		std::cout << "============== PARSING END ==============" << std::endl;
+	}
+
+	void translate() {
+		std::cout << "=========== TRANSLATING BEGIN ===========" << std::endl;
+		std::vector<uint32_t> instructions;
+		std::smatch match;
+
+		for (auto& instr : asm_instr) {
+			uint32_t instruction  = 0;
+
+			if (instr->is_local) {
+				std::cout << "Label" << std::endl;
+				continue;
+			}
+
+			if (instr->is_label)
+			{
+				std::cout << "Local label" << std::endl;
+				continue;
+			}
+
+			if (instr->is_instr)
+			{
+				std::cout << "Instruction" << instr->line << std::endl;
+
+    			if (std::regex_search(instr->line, match, instr0_re)) {
+    				std::string instr_alias = match.str(0);
+    				instr_alias = trim(instr_alias);
+
+    				std::cout << "Instr: " << instr_alias << std::endl;
+
+    				std::string instr_code = GET_STR(j_instr[instr_alias], "code");
+    				int code = std::stoi(instr_code, nullptr, 0);
+
+    				instruction |= code << 24; 			// append instruction code
+    				instruction |= instr->dir << 23;	// append direction
+    				// address mode here
+
+					std::cout << "Code for instr: " << instr_code << " => " << code << std::endl;
+    				
+					std::bitset<32> out(instruction);
+    				std::cout << out << std::endl;
+    			}
+			}
+		}
+		std::cout << "============ TRANSLATING END ============" << std::endl;
 	}
 
 	void parseLine(std::string &line, int line_cnt) {
