@@ -93,73 +93,6 @@ struct Parser {
 		std::cout << "============== PARSING END ==============" << std::endl;
 	}
 
-	void translateInstrMode(const std::string& composed, AsmBin& binInstr) {
-		std::smatch match;
-
-		static std::regex mod0_regex(
-						GET_STR(j_match["macro"], "__MOD0__"));
-
-		if (std::regex_match(composed, match, mod0_regex)) {
-			std::string instr_reg = match.str(0);
-			std::cout << "__MOD0__ instr -> "<< instr_reg << std::endl;
-			return;
-		}
-
-		static std::regex mod1_regex(
-						GET_STR(j_match["macro"], "__MOD1__"));
-
-		if (std::regex_match(composed, match, mod1_regex)) {
-			std::string instr_reg = match.str(0);
-			std::cout << "__MOD1__ instr -> "<< instr_reg << std::endl;
-			return;
-		}
-
-		static std::regex mod2_regex(
-						GET_STR(j_match["macro"], "__MOD2__"));
-
-		if (std::regex_match(composed, match, mod2_regex)) {
-			std::string instr_reg = match.str(0);
-			std::cout << "__MOD2__ instr -> "<< instr_reg << std::endl;
-			return;
-		}
-
-		static std::regex mod3_regex(
-						GET_STR(j_match["macro"], "__MOD3__"));
-
-		if (std::regex_match(composed, match, mod3_regex)) {
-			std::string instr_reg = match.str(0);
-			std::cout << "__MOD3__ instr -> "<< instr_reg << std::endl;
-			return;
-		}
-
-		static std::regex mod4_regex(
-						GET_STR(j_match["macro"], "__MOD4__"));
-
-		if (std::regex_match(composed, match, mod4_regex)) {
-			std::string instr_reg = match.str(0);
-			std::cout << "__MOD4__ instr -> "<< instr_reg << std::endl;
-			return;
-		}
-
-		static std::regex mod5_regex(
-						GET_STR(j_match["macro"], "__MOD5__"));
-
-		if (std::regex_match(composed, match, mod5_regex)) {
-			std::string instr_reg = match.str(0);
-			std::cout << "__MOD5__ instr -> "<< instr_reg << std::endl;
-			return;
-		}
-
-		static std::regex mod6_regex(
-						GET_STR(j_match["macro"], "__MOD6__"));
-
-		if (std::regex_match(composed, match, mod6_regex)) {
-			std::string instr_reg = match.str(0);
-			std::cout << "__MOD6__ instr -> "<< instr_reg << std::endl;
-			return;
-		}
-	}
-
 	void translate() {
 		std::cout << "=========== TRANSLATING BEGIN ===========" << std::endl;
 		std::vector<uint32_t> instructions;
@@ -319,20 +252,96 @@ struct Parser {
 		}
 	}
 
-	uint32_t find_mode(std::string comp) {
+	uint32_t find_mode(std::string composed) {
+		std::smatch match;
 
+		static std::regex mod0_regex(
+						GET_STR(j_match["macro"], "__MOD0__"));
+
+		if (std::regex_match(composed, match, mod0_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD0__ instr -> "<< instr_reg << std::endl;
+			return 0;
+		}
+
+		static std::regex mod1_regex(
+						GET_STR(j_match["macro"], "__MOD1__"));
+
+		if (std::regex_match(composed, match, mod1_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD1__ instr -> "<< instr_reg << std::endl;
+			return 1;
+		}
+
+		static std::regex mod2_regex(
+						GET_STR(j_match["macro"], "__MOD2__"));
+
+		if (std::regex_match(composed, match, mod2_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD2__ instr -> "<< instr_reg << std::endl;
+			return 2;
+		}
+
+		static std::regex mod3_regex(
+						GET_STR(j_match["macro"], "__MOD3__"));
+
+		if (std::regex_match(composed, match, mod3_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD3__ instr -> "<< instr_reg << std::endl;
+			return 3;
+		}
+
+		static std::regex mod4_regex(
+						GET_STR(j_match["macro"], "__MOD4__"));
+
+		if (std::regex_match(composed, match, mod4_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD4__ instr -> "<< instr_reg << std::endl;
+			return 4;
+		}
+
+		static std::regex mod5_regex(
+						GET_STR(j_match["macro"], "__MOD5__"));
+
+		if (std::regex_match(composed, match, mod5_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD5__ instr -> "<< instr_reg << std::endl;
+			return 5;
+		}
+
+		static std::regex mod6_regex(
+						GET_STR(j_match["macro"], "__MOD6__"));
+
+		if (std::regex_match(composed, match, mod6_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD6__ instr -> "<< instr_reg << std::endl;
+			return 6;
+		}
+
+		throw new EXCEPTION("Unkown instruction mode!");
 	}
 
 	uint32_t find_reg(std::string reg_part) {
+		std::smatch match;
 
+		static std::regex reg_regex(
+						GET_STR(j_match["macro"], "__REGS__"));
+
+		if (!std::regex_match(reg_part, match, reg_regex)) {
+			throw new EXCEPTION("Register not found in the reg_part!");
+		}
+
+		std::string code = GET_STR(j_regs, reg_part);
+
+		return 0;
 	}
 
 	uint32_t find_reg1(std::string comp, uint32_t mode) {
-
+		return 0;
 	}
 
 	uint32_t find_reg2(std::string comp, uint32_t mode) {
-
+		return 0;
 	}
 
 	uint32_t find_const(std::string const_str) {
@@ -343,6 +352,8 @@ struct Parser {
 		bool is_label = std::regex_match(const_str, label_regex);
 		bool is_local = std::regex_match(const_str, local_regex);
 		bool is_number = std::regex_match(const_str, number_regex);
+
+		return 0;
 	}
 
 	void expand_regs() {
