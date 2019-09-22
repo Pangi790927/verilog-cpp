@@ -1,7 +1,6 @@
 #ifndef ASM_INSTR
 #define ASM_INSTR
 
-#include "regs_map.h"
 #include "str_helper.h"
 #include "debug.h"
 
@@ -13,6 +12,9 @@ struct AsmInstr {
 	bool is_local;
 	bool is_label;
 	bool is_instr;
+	bool is_instr0;
+	bool is_instr1;
+	bool is_instr2;
 	int dir;		// 0 or 1
 	std::string parrent_label;
 	std::string line;

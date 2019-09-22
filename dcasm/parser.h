@@ -6,17 +6,9 @@
 #include <set>
 
 #include "str_helper.h"
-#include "instr_map.h"
 #include "asm_instr.h"
 #include "debug.h"
 #include "json.h"
-
-// instr		{space}__CMD__{space}
-// instr_op		{space}__CMD__{space}__DIRECTION__{space}
-// instr_re_op 	{space}__CMD__{space}__REGS__{,}__DIRECTION__{space}
-// instr_op_re 	{space}__CMD__{space}__DIRECTION__{,}__REGS__{space}
-// direction_re	{...}
-
 
 #define GET_STR(jobj, str)\
 ([&]() -> std::string {\
@@ -118,6 +110,16 @@ struct Parser {
 		bool is_op_re = std::regex_match(line, instr2or_re);
 		bool is_re_op = std::regex_match(line, instr2ro_re);
 
+		if (!(is_label || is_local || is_instr0 || is_instr1 || is_op_re ||
+				is_re_op))
+		{
+			if (ltrim(line) == "")
+				return ;
+			else
+				throw EXCEPTION("syntax error [line %d]: %s",
+						line_cnt, line.c_str()); 
+		}
+
 		static uint32_t current_addr = 0;
 		static std::string curr_label = "__main_file_label__";
 		bool has_constant = std::regex_search(line, constant_regex);
@@ -133,6 +135,9 @@ struct Parser {
 		AsmInstr instr = {
 			.is_label = is_label,
 			.is_local = is_local,
+			.is_instr0 = is_instr0,
+			.is_instr1 = is_instr1,
+			.is_instr2 = is_op_re || is_re_op,
 			.is_instr = is_instr0 || is_instr1 || is_re_op || is_op_re,
 			.dir = is_re_op, // all other are direction 0
 			.parrent_label = curr_label,

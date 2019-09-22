@@ -24,21 +24,21 @@ label:
 	jmp label
 	not .local_label
 	jmp .local_label
+	mov [eax + ebx + abcedx], edx
 	hlt
-.eax:
 label2:
 	jmp .local_label
-	.local_label    :
+	.local_label:
 
 func:
 	mov eax, 10
-	.back
+	.back:
 	test eax
 	je .back
 
 func2:
 	mov eax, 10
-	.back
+	.back:
 	test eax
 	je .back
 
