@@ -103,13 +103,15 @@ struct Parser {
 			AsmBin instruction;
 
 			if (instr->is_local) {
-				std::cout << "Label" << std::endl;
 				continue;
 			}
 
-			if (instr->is_label)
-			{
-				std::cout << "Local label" << std::endl;
+			if (instr->is_label) {
+				continue;
+			}
+
+			if (instr->is_data) {
+				std::cout << "DATA: TO DO" << std::endl;
 				continue;
 			}
 
@@ -117,14 +119,24 @@ struct Parser {
 			{
 				static std::regex instr_regex(
 						GET_STR(j_match["macro"], "__INSTRS__"));
+				static std::regex instr_sp_regex(
+						GET_STR(j_match["macro"], "__INSTR_SP__"));
 				static std::regex reg_regex(
 						GET_STR(j_match["macro"], "__REGS__"));
 				static std::regex comp_regex(
 						GET_STR(j_match["macro"], "__COMPOSED__"));
 
-				std::regex_search(instr->line, match, instr_regex);
-				std::string instr_alias = match.str(0);
-				instr_alias = trim(instr_alias);
+				std::string instr_alias;
+				if (!instr->is_instr0) {
+					std::regex_search(instr->line, match, instr_sp_regex);
+					instr_alias = match.str(0);
+					instr_alias = trim(instr_alias);
+				}
+				else {
+					std::regex_search(instr->line, match, instr_regex);
+					instr_alias = match.str(0);
+					instr_alias = trim(instr_alias);	
+				}
 
 				std::string instr_code = GET_STR(j_instr[instr_alias], "code");
 				int code = std::stoi(instr_code, nullptr, 0);
@@ -142,12 +154,15 @@ struct Parser {
 				else if (instr->is_instr1) {
 					std::regex_search(rest, match, comp_regex);
 					std::string comp = match.str(0);
+
 					instruction.mod = find_mode(comp, instr.get());
+
 					if (has_const(comp, instruction.mod, instr.get())) {
 						has_const_val = true;
-						const_val = find_const(match.str(), instruction.mod,
+						const_val = find_const(comp, instruction.mod,
 								instr->parrent_label, instr.get());
 					}
+
 					instruction.reg1 = find_reg1(comp, instruction.mod, instr.get());
 					instruction.reg2 = find_reg2(comp, instruction.mod, instr.get());
 				}
@@ -155,14 +170,17 @@ struct Parser {
 					std::regex_search(rest, match, comp_regex);
 					std::string comp = match.str();
 					std::string rest2 = match.suffix().str();
+
 					std::regex_search(rest2, match, reg_regex);
 					instruction.reg = find_reg(match.str(), instr.get());
 					instruction.mod = find_mode(comp, instr.get());
+
 					if (has_const(comp, instruction.mod, instr.get())) {
 						has_const_val = true;
-						const_val = find_const(match.str(), instruction.mod,
+						const_val = find_const(comp, instruction.mod,
 								instr->parrent_label, instr.get());
 					}
+
 					instruction.reg1 = find_reg1(comp, instruction.mod, instr.get());
 					instruction.reg2 = find_reg2(comp, instruction.mod, instr.get());
 				}
@@ -170,20 +188,24 @@ struct Parser {
 					std::regex_search(rest, match, reg_regex);
 					instruction.reg = find_reg(match.str(), instr.get());
 					std::string rest2 = match.suffix().str();
+
 					std::regex_search(rest2, match, comp_regex);
 					std::string comp = match.str();
 					instruction.mod = find_mode(comp, instr.get());
+
 					if (has_const(comp, instruction.mod, instr.get())) {
 						has_const_val = true;
-						const_val = find_const(match.str(), instruction.mod,
+						const_val = find_const(comp, instruction.mod,
 								instr->parrent_label, instr.get());
 					}
+
 					instruction.reg1 = find_reg1(comp, instruction.mod, instr.get());
 					instruction.reg2 = find_reg2(comp, instruction.mod, instr.get());
 				}
 				std::cout << "Instr line: " << instr->line << std::endl;
-
 				std::cout << instruction.to_string() << std::endl;
+				if (has_const_val)
+					std::cout << "const val: " << const_val << std::endl;
 			}
 		}
 		std::cout << "============ TRANSLATING END ============" << std::endl;
@@ -191,6 +213,7 @@ struct Parser {
 
 	void parseLine(std::string &line, int line_cnt) {
 		static std::regex comment_regex(GET_STR(j_match, "comment"));
+		static std::regex data_regex(GET_STR(j_match, "data"));
 		static std::regex constant_regex(
 				GET_STR(j_match["macro"], "__CONSTANT__"));
 		static std::regex local_regex(
@@ -205,9 +228,10 @@ struct Parser {
 		bool is_instr1 = std::regex_match(line, instr1_re);
 		bool is_op_re = std::regex_match(line, instr2or_re);
 		bool is_re_op = std::regex_match(line, instr2ro_re);
+		bool is_data = std::regex_match(line, data_regex);
 
 		if (!(is_label || is_local || is_instr0 || is_instr1 || is_op_re ||
-				is_re_op))
+				is_re_op || is_data))
 		{
 			if (ltrim(line) == "")
 				return ;
@@ -231,6 +255,7 @@ struct Parser {
 		AsmInstr instr = {
 			.is_label = is_label,
 			.is_local = is_local,
+			.is_data = is_data,
 			.is_instr0 = is_instr0,
 			.is_instr1 = is_instr1,
 			.is_instr2 = is_op_re || is_re_op,
@@ -333,21 +358,40 @@ struct Parser {
 						match.str().c_str(), instr->line_nr, instr->line.c_str());
 		}
 
-		std::string code = GET_STR(j_regs, reg_part);
-
-		return 0;
+		return own_stol(GET_STR(j_regs, reg_part));
 	}
 
 	uint32_t find_reg1(std::string comp, uint32_t mode, AsmInstr *instr) {
+		static std::regex reg_regex(GET_STR(j_match["macro"], "__REGS__"));
+
+		std::smatch match;
+		if (mode == 0 || mode == 4 || mode == 5)
+			return 0;
+		if (mode == 1 || mode == 6) {
+			std::regex_search(comp, match, reg_regex);
+			return own_stol(GET_STR(j_regs, match.str()));
+		}
 		return 0;
 	}
 
 	uint32_t find_reg2(std::string comp, uint32_t mode, AsmInstr *instr) {
+		static std::regex reg_regex(GET_STR(j_match["macro"], "__REGS__"));
+
+		std::smatch match;
+		if (mode == 0 || mode == 4 || mode == 5)
+			return 0;
+		if (mode == 1 || mode == 6) {
+			std::regex_search(comp, match, reg_regex);
+			comp = match.suffix().str();
+		}
+		if (mode == 6) {
+			std::regex_search(comp, match, reg_regex);
+			return own_stol(GET_STR(j_regs, match.str()));
+		}
 		return 0;
 	}
 
 	bool has_const(std::string comp, uint32_t mode, AsmInstr *instr) {
-		std::cout << "mode: " << mode << std::endl;
 		switch(mode) {
 			case 0: return false;
 			case 1: return true;
@@ -368,36 +412,71 @@ struct Parser {
 		static std::regex label_regex(GET_STR(j_match["macro"], "__LABEL__"));		
 		static std::regex local_regex(GET_STR(j_match["macro"], "__LOCAL_LB__"));		
 		static std::regex number_regex(GET_STR(j_match["macro"], "__NUMBER__"));		
-		static std::regex reg_regex(GET_STR(j_match["macro"], "__REGS__"));		
+		static std::regex char_regex(GET_STR(j_match["macro"], "__CHAR__"));		
+		static std::regex reg_regex(GET_STR(j_match["macro"], "__REGS__"));
 		static std::regex const_regex(GET_STR(j_match["macro"], "__CONSTANT__"));		
 
 		std::smatch match;
 		if (mode == 0 || mode == 4 || mode == 5)
 			return 0;
 		if (mode == 1 || mode == 6) {
-			std::regex_match(comp, match, reg_regex);
+			std::regex_search(comp, match, reg_regex);
 			comp = match.suffix().str();
 		}
 		if (mode == 6) {
-			std::regex_match(comp, match, reg_regex);
+			std::regex_search(comp, match, reg_regex);
 			comp = match.suffix().str();	
 		}
 
-		std::regex_match(comp, match, const_regex);
+		std::regex_search(comp, match, const_regex);
 		std::string const_str = match.str();
 
 		bool is_label = std::regex_match(const_str, label_regex);
 		bool is_local = std::regex_match(const_str, local_regex);
 		bool is_number = std::regex_match(const_str, number_regex);
+		bool is_char = std::regex_match(const_str, char_regex);
 
 		if (is_label) {
-			std::cout << const_str << std::endl;
-			std::regex_search(const_str, match, label_regex);
-			if (label_map.find(match.str()) == label_map.end())
+			std::string label = const_str;
+			if (label_map.find(label) == label_map.end())
 				throw EXCEPTION("label not defined: %s [line %d] %s",
-						match.str().c_str(), instr->line_nr, instr->line.c_str());
+						label.c_str(), instr->line_nr, instr->line.c_str());
+			return label_map[label]->addr;
+		}
+		if (is_local) {
+			std::string label = parrent_label + const_str;
+			if (label_map.find(label) == label_map.end())
+				throw EXCEPTION("local label not defined: %s [line %d] %s",
+						label.c_str(), instr->line_nr, instr->line.c_str());
+			return label_map[label]->addr;
+		}
+		if (is_local) {
+			std::string label = parrent_label + const_str;
+			if (label_map.find(label) == label_map.end())
+				throw EXCEPTION("local label not defined: %s [line %d] %s",
+						label.c_str(), instr->line_nr, instr->line.c_str());
+			return label_map[label]->addr;
+		}
+		if (is_number) {
+			return read_num(const_str, instr);
+		}
+		if (is_char) {
+			if (const_str.size() != 3)
+				throw EXCEPTION("invalid character: %s [line %d] %s",
+						const_str.c_str(), instr->line_nr, instr->line.c_str());
+			return const_str[1];
 		}
 		return 0;
+	}
+
+	uint32_t read_num(std::string num_str, AsmInstr *instr) {
+		try {
+			return own_stol(num_str);
+		}
+		catch (std::exception& ex) {
+			throw EXCEPTION("parsing number err: %s [line %d] %s",
+					ex.what(), instr->line_nr, instr->line.c_str());
+		}
 	}
 
 	void expand_regs() {

@@ -53,15 +53,22 @@ static inline std::string trimComments (std::string line) {
 }
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {
-    if(from.empty())
-        return;
-    size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
-    }
+	if(from.empty())
+		return;
+	size_t start_pos = 0;
+	while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+	}
 }
 
+inline uint32_t own_stol(std::string num_str) {
+	if (num_str.size() > 1) {
+		if (num_str[0] == '0' && num_str[1] == 'b')
+			return std::stol(num_str.c_str() + 2, NULL, 2);
+	}
+	return std::stol(num_str, NULL, 0);
+}
 
 
 #endif

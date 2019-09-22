@@ -8,6 +8,12 @@
 	// .local
 // label.local
 // (line, dir, label, line, word_cnt, addr)
+enum {
+	DATA_BYTE,
+	DATA_WORD,
+	DATA_DWORD
+};
+
 struct AsmInstr {
 	bool is_local;
 	bool is_label;
@@ -15,6 +21,8 @@ struct AsmInstr {
 	bool is_instr0;
 	bool is_instr1;
 	bool is_instr2;
+	bool is_data;
+	int array_type;
 	int dir;		// 0 or 1
 	std::string parrent_label;
 	std::string line;

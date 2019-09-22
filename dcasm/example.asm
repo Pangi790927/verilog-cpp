@@ -25,6 +25,7 @@ label:
 	; mov [eax + 32], 32
 	not .local_label
 	jmp .local_label
+abcedx:
 	mov [eax + ebx + abcedx], edx
 	hlt
 label2:
@@ -43,6 +44,16 @@ func2:
 	test eax
 	je .back
 
+mov eax, message
+call print_message
+
+mov eax, 'a'
+
+print_message:
+	int 0x10
+
+message:
+	db "this is a string", 0
 
 ; match
 ; extrct
