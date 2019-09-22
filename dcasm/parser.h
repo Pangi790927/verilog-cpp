@@ -212,7 +212,7 @@ struct Parser {
 					instruction.mod = find_mode(comp, instr.get());
 					if (has_const(comp, instruction.mod, instr.get())) {
 						has_const_val = true;
-						const_val = find_const(match.str(),
+						const_val = find_const(match.str(), instruction.mod,
 								instr->parrent_label, instr.get());
 					}
 					instruction.reg1 = find_reg1(comp, instruction.mod, instr.get());
@@ -227,7 +227,7 @@ struct Parser {
 					instruction.mod = find_mode(comp, instr.get());
 					if (has_const(comp, instruction.mod, instr.get())) {
 						has_const_val = true;
-						const_val = find_const(match.str(),
+						const_val = find_const(match.str(), instruction.mod,
 								instr->parrent_label, instr.get());
 					}
 					instruction.reg1 = find_reg1(comp, instruction.mod, instr.get());
@@ -242,7 +242,7 @@ struct Parser {
 					instruction.mod = find_mode(comp, instr.get());
 					if (has_const(comp, instruction.mod, instr.get())) {
 						has_const_val = true;
-						const_val = find_const(match.str(),
+						const_val = find_const(match.str(), instruction.mod,
 								instr->parrent_label, instr.get());
 					}
 					instruction.reg1 = find_reg1(comp, instruction.mod, instr.get());
@@ -336,19 +336,45 @@ struct Parser {
 	}
 
 	bool has_const(std::string comp, uint32_t mode, AsmInstr *instr) {
-		static std::regex const_regex(GET_STR(j_match["macro"], "__CONSTANT__"));
-
+		std::cout << "mode: " << mode << std::endl;
+		switch(mode) {
+			case 0: return false;
+			case 1: return true;
+			case 2: return true;
+			case 3: return true;
+			case 4: return false;
+			case 5: return false;
+			case 6: return true;
+			default: throw EXCEPTION("mode not known for instr[line %d] %s",
+				instr->line_nr, instr->line.c_str());
+		}
 		return false;
 	}
 
-	uint32_t find_const(std::string const_str, std::string parrent_label,
-			AsmInstr *instr)
+	uint32_t find_const(std::string comp, uint32_t mode,
+			std::string parrent_label, AsmInstr *instr)
 	{
 		static std::regex label_regex(GET_STR(j_match["macro"], "__LABEL__"));		
 		static std::regex local_regex(GET_STR(j_match["macro"], "__LOCAL_LB__"));		
 		static std::regex number_regex(GET_STR(j_match["macro"], "__NUMBER__"));		
-		
+		static std::regex reg_regex(GET_STR(j_match["macro"], "__REGS__"));		
+		static std::regex const_regex(GET_STR(j_match["macro"], "__CONSTANT__"));		
+
 		std::smatch match;
+		if (mode == 0 || mode == 4 || mode == 5)
+			return 0;
+		if (mode == 1 || mode == 6) {
+			std::regex_match(comp, match, reg_regex);
+			comp = match.suffix().str();
+		}
+		if (mode == 6) {
+			std::regex_match(comp, match, reg_regex);
+			comp = match.suffix().str();	
+		}
+
+		std::regex_match(comp, match, const_regex);
+		std::string const_str = match.str();
+
 		bool is_label = std::regex_match(const_str, label_regex);
 		bool is_local = std::regex_match(const_str, local_regex);
 		bool is_number = std::regex_match(const_str, number_regex);
