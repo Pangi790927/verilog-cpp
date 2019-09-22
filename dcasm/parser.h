@@ -181,7 +181,7 @@ struct Parser {
 					instruction.reg1 = find_reg1(comp, instruction.mod, instr.get());
 					instruction.reg2 = find_reg2(comp, instruction.mod, instr.get());
 				}
-				std::cout << "Code for instr: " << instr->line << std::endl;
+				std::cout << "Instr line: " << instr->line << std::endl;
 
 				std::cout << instruction.to_string() << std::endl;
 			}
@@ -260,7 +260,7 @@ struct Parser {
 
 		if (std::regex_match(composed, match, mod0_regex)) {
 			std::string instr_reg = match.str(0);
-			std::cout << "__MOD0__ instr -> "<< instr_reg << std::endl;
+			std::cout << "__MOD0__ instr -> "<< composed << std::endl;
 			return 0;
 		}
 
@@ -269,7 +269,7 @@ struct Parser {
 
 		if (std::regex_match(composed, match, mod1_regex)) {
 			std::string instr_reg = match.str(0);
-			std::cout << "__MOD1__ instr -> "<< instr_reg << std::endl;
+			std::cout << "__MOD1__ instr -> "<< composed << std::endl;
 			return 1;
 		}
 
@@ -278,7 +278,7 @@ struct Parser {
 
 		if (std::regex_match(composed, match, mod2_regex)) {
 			std::string instr_reg = match.str(0);
-			std::cout << "__MOD2__ instr -> "<< instr_reg << std::endl;
+			std::cout << "__MOD2__ instr -> "<< composed << std::endl;
 			return 2;
 		}
 
@@ -287,7 +287,7 @@ struct Parser {
 
 		if (std::regex_match(composed, match, mod3_regex)) {
 			std::string instr_reg = match.str(0);
-			std::cout << "__MOD3__ instr -> "<< instr_reg << std::endl;
+			std::cout << "__MOD3__ instr -> "<< composed << std::endl;
 			return 3;
 		}
 
@@ -296,7 +296,7 @@ struct Parser {
 
 		if (std::regex_match(composed, match, mod4_regex)) {
 			std::string instr_reg = match.str(0);
-			std::cout << "__MOD4__ instr -> "<< instr_reg << std::endl;
+			std::cout << "__MOD4__ instr -> "<< composed << std::endl;
 			return 4;
 		}
 
@@ -305,7 +305,7 @@ struct Parser {
 
 		if (std::regex_match(composed, match, mod5_regex)) {
 			std::string instr_reg = match.str(0);
-			std::cout << "__MOD5__ instr -> "<< instr_reg << std::endl;
+			std::cout << "__MOD5__ instr -> "<< composed << std::endl;
 			return 5;
 		}
 
@@ -314,11 +314,12 @@ struct Parser {
 
 		if (std::regex_match(composed, match, mod6_regex)) {
 			std::string instr_reg = match.str(0);
-			std::cout << "__MOD6__ instr -> "<< instr_reg << std::endl;
+			std::cout << "__MOD6__ instr -> "<< composed << std::endl;
 			return 6;
 		}
 
-		throw new EXCEPTION("Unkown instruction mode!");
+		throw new EXCEPTION("Unkown instruction mode: : %s [line %d] %s",
+						match.str().c_str(), instr->line_nr, instr->line.c_str());
 	}
 
 	uint32_t find_reg(std::string reg_part, AsmInstr *instr) {
@@ -328,7 +329,8 @@ struct Parser {
 						GET_STR(j_match["macro"], "__REGS__"));
 
 		if (!std::regex_match(reg_part, match, reg_regex)) {
-			throw new EXCEPTION("Register not found in the reg_part!");
+			throw new EXCEPTION("Register not found in the reg_part: %s [line %d] %s",
+						match.str().c_str(), instr->line_nr, instr->line.c_str());
 		}
 
 		std::string code = GET_STR(j_regs, reg_part);
