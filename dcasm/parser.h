@@ -188,8 +188,6 @@ struct Parser {
 						GET_STR(j_match["macro"], "__REGS__"));
 				static std::regex comp_regex(
 						GET_STR(j_match["macro"], "__COMPOSED__"));
-				static std::regex const_regex(
-						GET_STR(j_match["macro"], "__CONSTANT__"));
 
 				std::regex_search(instr->line, match, instr_regex);
 				std::string instr_alias = match.str(0);
@@ -203,51 +201,52 @@ struct Parser {
 				
 				std::string rest = match.suffix();
 				uint32_t const_val = 0;
-				bool has_const = false;
+				bool has_const_val = false;
 
 				if (instr->is_instr0) {
 					; // nothing more to do
 				}
 				else if (instr->is_instr1) {
 					std::regex_search(rest, match, comp_regex);
-					std::string comp = match.str();
-					if (std::regex_search(comp, match, const_regex)) {
-						has_const = true;
-						const_val = find_const(match.str());
+					std::string comp = match.str(0);
+					instruction.mod = find_mode(comp, instr.get());
+					if (has_const(comp, instruction.mod, instr.get())) {
+						has_const_val = true;
+						const_val = find_const(match.str(),
+								instr->parrent_label, instr.get());
 					}
-					instruction.mod = find_mode(comp);
-					instruction.reg1 = find_reg1(comp, instruction.mod);
-					instruction.reg2 = find_reg2(comp, instruction.mod);
+					instruction.reg1 = find_reg1(comp, instruction.mod, instr.get());
+					instruction.reg2 = find_reg2(comp, instruction.mod, instr.get());
 				}
 				else if (instr->is_instr2 && instr->dir == 0) {
 					std::regex_search(rest, match, comp_regex);
 					std::string comp = match.str();
 					std::string rest2 = match.suffix().str();
 					std::regex_search(rest2, match, reg_regex);
-					instruction.reg = find_reg(match.str());
-
-					if (std::regex_search(comp, match, const_regex)) {
-						has_const = true;
-						const_val = find_const(match.str());
+					instruction.reg = find_reg(match.str(), instr.get());
+					instruction.mod = find_mode(comp, instr.get());
+					if (has_const(comp, instruction.mod, instr.get())) {
+						has_const_val = true;
+						const_val = find_const(match.str(),
+								instr->parrent_label, instr.get());
 					}
-					instruction.mod = find_mode(comp);
-					instruction.reg1 = find_reg1(comp, instruction.mod);
-					instruction.reg2 = find_reg2(comp, instruction.mod);
+					instruction.reg1 = find_reg1(comp, instruction.mod, instr.get());
+					instruction.reg2 = find_reg2(comp, instruction.mod, instr.get());
 				}
 				else if (instr->is_instr2 && instr->dir == 1) {
 					std::regex_search(rest, match, reg_regex);
-					instruction.reg = find_reg(match.str());
+					instruction.reg = find_reg(match.str(), instr.get());
 					std::string rest2 = match.suffix().str();
 					std::regex_search(rest2, match, comp_regex);
 					std::string comp = match.str();
-
-					if (std::regex_search(comp, match, const_regex)) {
-						has_const = true;
-						const_val = find_const(match.str());
+					instruction.mod = find_mode(comp, instr.get());
+					if (has_const(comp, instruction.mod, instr.get())) {
+						has_const_val = true;
+						const_val = find_const(match.str(),
+								instr->parrent_label, instr.get());
 					}
-					instruction.mod = find_mode(comp);
-					instruction.reg1 = find_reg1(comp, instruction.mod);
-					instruction.reg2 = find_reg2(comp, instruction.mod);
+					instruction.reg1 = find_reg1(comp, instruction.mod, instr.get());
+					instruction.reg2 = find_reg2(comp, instruction.mod, instr.get());
 				}
 				std::cout << "Code for instr: " << instr->line << std::endl;
 
@@ -306,6 +305,7 @@ struct Parser {
 			.dir = is_re_op, // all other are direction 0
 			.parrent_label = curr_label,
 			.line = line,
+			.line_nr = line_cnt,
 			.word_cnt = !(is_local || is_label) ? 1 + has_constant : 0,
 			.addr = current_addr
 		};
@@ -319,30 +319,48 @@ struct Parser {
 		}
 	}
 
-	uint32_t find_mode(std::string comp) {
-
+	uint32_t find_mode(std::string comp, AsmInstr *instr) {
+		return 0;
 	}
 
-	uint32_t find_reg(std::string reg_part) {
-
+	uint32_t find_reg(std::string reg_part, AsmInstr *instr) {
+		return 0;
 	}
 
-	uint32_t find_reg1(std::string comp, uint32_t mode) {
-
+	uint32_t find_reg1(std::string comp, uint32_t mode, AsmInstr *instr) {
+		return 0;
 	}
 
-	uint32_t find_reg2(std::string comp, uint32_t mode) {
-
+	uint32_t find_reg2(std::string comp, uint32_t mode, AsmInstr *instr) {
+		return 0;
 	}
 
-	uint32_t find_const(std::string const_str) {
+	bool has_const(std::string comp, uint32_t mode, AsmInstr *instr) {
+		static std::regex const_regex(GET_STR(j_match["macro"], "__CONSTANT__"));
+
+		return false;
+	}
+
+	uint32_t find_const(std::string const_str, std::string parrent_label,
+			AsmInstr *instr)
+	{
 		static std::regex label_regex(GET_STR(j_match["macro"], "__LABEL__"));		
 		static std::regex local_regex(GET_STR(j_match["macro"], "__LOCAL_LB__"));		
 		static std::regex number_regex(GET_STR(j_match["macro"], "__NUMBER__"));		
 		
+		std::smatch match;
 		bool is_label = std::regex_match(const_str, label_regex);
 		bool is_local = std::regex_match(const_str, local_regex);
 		bool is_number = std::regex_match(const_str, number_regex);
+
+		if (is_label) {
+			std::cout << const_str << std::endl;
+			std::regex_search(const_str, match, label_regex);
+			if (label_map.find(match.str()) == label_map.end())
+				throw EXCEPTION("label not defined: %s [line %d] %s",
+						match.str().c_str(), instr->line_nr, instr->line.c_str());
+		}
+		return 0;
 	}
 
 	void expand_regs() {
@@ -368,7 +386,17 @@ struct Parser {
 	bool needs_expansion(const std::string& reg_expr) {
 		using namespace nlohmann;
 		for (auto&& [key, macro] : j_match["macro"].get<json::object_t>()) {
-			if (macro.get<std::string>().find(reg_expr) != std::string::npos) {
+			if (reg_expr.find(key) != std::string::npos) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool any_unexpanded() {
+		using namespace nlohmann;
+		for (auto&& [key, val] : j_match["macro"].get<json::object_t>()) {
+			if (needs_expansion(val.get<std::string>())) {
 				return true;
 			}
 		}
@@ -381,7 +409,7 @@ struct Parser {
 			if (j_match["macro"][macro].get<std::string>().find(key) !=
 					std::string::npos)
 			{
-				if (needs_expansion(key)) {
+				if (needs_expansion(val.get<std::string>())) {
 					if (in_exp.find(key) != in_exp.end()) {
 						throw std::runtime_error("recursive macro expansion");
 					}
@@ -402,11 +430,13 @@ struct Parser {
 		using namespace nlohmann;
 		expand_regs();
 		expand_instrs();
-		for (auto&& [key, val] : j_match["macro"].get<json::object_t>()) {
-			if (needs_expansion(val.get<std::string>())) {
-				std::set<std::string> in_expansion;
-				in_expansion.insert(key);
-				expand_macro(key, in_expansion);
+		while (any_unexpanded()) {
+			for (auto&& [key, val] : j_match["macro"].get<json::object_t>()) {
+				if (needs_expansion(val.get<std::string>())) {
+					std::set<std::string> in_expansion;
+					in_expansion.insert(key);
+					expand_macro(key, in_expansion);
+				}
 			}
 		}
 		for (auto&& [key, _] : j_match.get<json::object_t>()) {

@@ -18,6 +18,7 @@ struct AsmInstr {
 	int dir;		// 0 or 1
 	std::string parrent_label;
 	std::string line;
+	int line_nr;
 	int word_cnt;
 	uint32_t addr;
 };
