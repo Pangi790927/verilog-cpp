@@ -252,7 +252,7 @@ struct Parser {
 		}
 	}
 
-	uint32_t find_mode(std::string composed) {
+	uint32_t find_mode(std::string composed, AsmInstr *instr) {
 		std::smatch match;
 
 		static std::regex mod0_regex(
@@ -321,7 +321,7 @@ struct Parser {
 		throw new EXCEPTION("Unkown instruction mode!");
 	}
 
-	uint32_t find_reg(std::string reg_part) {
+	uint32_t find_reg(std::string reg_part, AsmInstr *instr) {
 		std::smatch match;
 
 		static std::regex reg_regex(
@@ -336,11 +336,11 @@ struct Parser {
 		return 0;
 	}
 
-	uint32_t find_reg1(std::string comp, uint32_t mode) {
+	uint32_t find_reg1(std::string comp, uint32_t mode, AsmInstr *instr) {
 		return 0;
 	}
 
-	uint32_t find_reg2(std::string comp, uint32_t mode) {
+	uint32_t find_reg2(std::string comp, uint32_t mode, AsmInstr *instr) {
 		return 0;
 	}
 
