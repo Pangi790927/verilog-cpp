@@ -100,7 +100,7 @@ struct Parser {
 		std::smatch match;
 
 		for (auto& instr : asm_instr) {
-			uint32_t instruction  = 0;
+			AsmBin instruction;
 
 			if (instr->is_local) {
 				std::cout << "Label" << std::endl;
@@ -117,24 +117,23 @@ struct Parser {
 			{
 				std::cout << "Instruction" << instr->line << std::endl;
 
-    			if (std::regex_search(instr->line, match, instr0_re)) {
-    				std::string instr_alias = match.str(0);
-    				instr_alias = trim(instr_alias);
+				if (std::regex_search(instr->line, match, instr0_re)) {
+					std::string instr_alias = match.str(0);
+					instr_alias = trim(instr_alias);
 
-    				std::cout << "Instr: " << instr_alias << std::endl;
+					std::cout << "Instr: " << instr_alias << std::endl;
 
-    				std::string instr_code = GET_STR(j_instr[instr_alias], "code");
-    				int code = std::stoi(instr_code, nullptr, 0);
+					std::string instr_code = GET_STR(j_instr[instr_alias], "code");
+					int code = std::stoi(instr_code, nullptr, 0);
 
-    				instruction |= code << 24; 			// append instruction code
-    				instruction |= instr->dir << 23;	// append direction
-    				// address mode here
+					instruction.op = code;			// append instruction code
+					instruction.dir = instr->dir;	// append direction
+					// address mode here
 
-					std::cout << "Code for instr: " << instr_code << " => " << code << std::endl;
-    				
-					std::bitset<32> out(instruction);
-    				std::cout << out << std::endl;
-    			}
+					std::cout << "Code for instr: " << instr_code
+							<< " => " << code << std::endl;					
+					std::cout << instruction.to_string() << std::endl;
+				}
 			}
 		}
 		std::cout << "============ TRANSLATING END ============" << std::endl;

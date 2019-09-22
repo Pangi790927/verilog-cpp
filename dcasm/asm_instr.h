@@ -22,13 +22,26 @@ struct AsmInstr {
 	uint32_t addr;
 };
 
-struct AsmBin __attribute__((__packed__)) {
-	uint32_t op 	: 8;
-	uint32_t dir	: 1;
-	uint32_t mod	: 3;
-	uint32_t reg	: 5;
-	uint32_t reg1	: 5;
-	uint32_t reg2	: 5;
+struct AsmBin {
+	union {
+		struct __attribute__((__packed__)) {
+			uint32_t op 	: 8;
+			uint32_t dir	: 1;
+			uint32_t mod	: 3;
+			uint32_t reg	: 5;
+			uint32_t reg1	: 5;
+			uint32_t reg2	: 5;
+		};
+		uint32_t code = 0;
+	};
+
+	std::string to_string() {
+		char buff[128]{0};
+		snprintf(buff, sizeof(buff),
+				"%#x -> op[%#x]dir[%d]mod[%d]reg[%d]reg1[%d]reg2[%d]",
+				code, op, dir, mod, reg, reg1, reg2);
+		return buff;
+	}
 };
 
 
