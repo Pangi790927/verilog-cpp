@@ -147,19 +147,6 @@ struct Parser {
     				std::cout << "Instr: " << instr_alias << "\t" << op1 << std::endl;
 
     			}
-
-    			if (std::regex_search(instr->line, match, instr1_re)) {
-					std::cout << "1-arg instruction" << instr->line << std::endl;
-
-					std::string instr_alias = match.str(1);
-					std::string op1 = match.str(3); // first and only operand
-
-    				instr_alias = trim(instr_alias);
-    				op1 = trim(op1);
-
-    				std::cout << "Instr: " << instr_alias << "\t" << op1 << std::endl;
-
-    			}
 			}
 		}
 		std::cout << "============ TRANSLATING END ============" << std::endl;
