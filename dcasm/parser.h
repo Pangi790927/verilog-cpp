@@ -272,6 +272,10 @@ struct Parser {
 		static std::regex label_regex(GET_STR(j_match["macro"], "__LABEL__"));		
 		static std::regex local_regex(GET_STR(j_match["macro"], "__LOCAL_LB__"));		
 		static std::regex number_regex(GET_STR(j_match["macro"], "__NUMBER__"));		
+		
+		bool is_label = std::regex_match(const_str, label_regex);
+		bool is_local = std::regex_match(const_str, local_regex);
+		bool is_local = std::regex_match(const_str, number_regex);
 	}
 
 	void expand_regs() {
