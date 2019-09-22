@@ -22,6 +22,7 @@ label:
 	.local_label:
 	jmp [eax + 322]
 	jmp label
+	; mov [eax + 32], 32
 	not .local_label
 	jmp .local_label
 	mov [eax + ebx + abcedx], edx

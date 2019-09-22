@@ -22,4 +22,15 @@ struct AsmInstr {
 	uint32_t addr;
 };
 
+struct AsmBin __attribute__((__packed__)) {
+	uint32_t op 	: 8;
+	uint32_t dir	: 1;
+	uint32_t mod	: 3;
+	uint32_t reg	: 5;
+	uint32_t reg1	: 5;
+	uint32_t reg2	: 5;
+};
+
+
+
 #endif
