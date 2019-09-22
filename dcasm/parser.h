@@ -93,6 +93,73 @@ struct Parser {
 		std::cout << "============== PARSING END ==============" << std::endl;
 	}
 
+	void translateInstrMode(const std::string& composed, AsmBin& binInstr) {
+		std::smatch match;
+
+		static std::regex mod0_regex(
+						GET_STR(j_match["macro"], "__MOD0__"));
+
+		if (std::regex_match(composed, match, mod0_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD0__ instr -> "<< instr_reg << std::endl;
+			return;
+		}
+
+		static std::regex mod1_regex(
+						GET_STR(j_match["macro"], "__MOD1__"));
+
+		if (std::regex_match(composed, match, mod1_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD1__ instr -> "<< instr_reg << std::endl;
+			return;
+		}
+
+		static std::regex mod2_regex(
+						GET_STR(j_match["macro"], "__MOD2__"));
+
+		if (std::regex_match(composed, match, mod2_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD2__ instr -> "<< instr_reg << std::endl;
+			return;
+		}
+
+		static std::regex mod3_regex(
+						GET_STR(j_match["macro"], "__MOD3__"));
+
+		if (std::regex_match(composed, match, mod3_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD3__ instr -> "<< instr_reg << std::endl;
+			return;
+		}
+
+		static std::regex mod4_regex(
+						GET_STR(j_match["macro"], "__MOD4__"));
+
+		if (std::regex_match(composed, match, mod4_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD4__ instr -> "<< instr_reg << std::endl;
+			return;
+		}
+
+		static std::regex mod5_regex(
+						GET_STR(j_match["macro"], "__MOD5__"));
+
+		if (std::regex_match(composed, match, mod5_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD5__ instr -> "<< instr_reg << std::endl;
+			return;
+		}
+
+		static std::regex mod6_regex(
+						GET_STR(j_match["macro"], "__MOD6__"));
+
+		if (std::regex_match(composed, match, mod6_regex)) {
+			std::string instr_reg = match.str(0);
+			std::cout << "__MOD6__ instr -> "<< instr_reg << std::endl;
+			return;
+		}
+	}
+
 	void translate() {
 		std::cout << "=========== TRANSLATING BEGIN ===========" << std::endl;
 		std::vector<uint32_t> instructions;
@@ -181,9 +248,9 @@ struct Parser {
 					instruction.mod = find_mode(comp);
 					instruction.reg1 = find_reg1(comp, instruction.mod);
 					instruction.reg2 = find_reg2(comp, instruction.mod);
-
 				}
 				std::cout << "Code for instr: " << instr->line << std::endl;
+
 				std::cout << instruction.to_string() << std::endl;
 			}
 		}
