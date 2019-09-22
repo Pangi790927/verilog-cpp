@@ -116,24 +116,28 @@ struct Parser {
 			if (instr->is_instr)
 			{
 				std::cout << "Instruction" << instr->line << std::endl;
+				std::string instr_alias = match.str(0);
+				instr_alias = trim(instr_alias);
 
-				if (std::regex_search(instr->line, match, instr0_re)) {
-					std::string instr_alias = match.str(0);
-					instr_alias = trim(instr_alias);
+				std::cout << "Instr: " << instr_alias << std::endl;
 
-					std::cout << "Instr: " << instr_alias << std::endl;
+				std::string instr_code = GET_STR(j_instr[instr_alias], "code");
+				int code = std::stoi(instr_code, nullptr, 0);
 
-					std::string instr_code = GET_STR(j_instr[instr_alias], "code");
-					int code = std::stoi(instr_code, nullptr, 0);
+				instruction.op = code;			// append instruction code
+				instruction.dir = instr->dir;	// append direction
+				std::string rest = match.suffix().str();
 
-					instruction.op = code;			// append instruction code
-					instruction.dir = instr->dir;	// append direction
-					// address mode here
+				if (instr->is_instr0) {
 
-					std::cout << "Code for instr: " << instr_code
-							<< " => " << code << std::endl;					
-					std::cout << instruction.to_string() << std::endl;
 				}
+				if (instr->is_instr0) {
+
+				}
+
+				std::cout << "Code for instr: " << instr_code
+						<< " => " << code << std::endl;					
+				std::cout << instruction.to_string() << std::endl;
 			}
 		}
 		std::cout << "============ TRANSLATING END ============" << std::endl;

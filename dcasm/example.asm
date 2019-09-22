@@ -7,7 +7,7 @@
 	jmp label
 	.l32:
 		; abc
-; abc2    
+; abc2
 	mov [eax + ebx + 123], ecx
 	mov ecx, [eax + ebx + 123]
 mov eax, ebx ; comment
