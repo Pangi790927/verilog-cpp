@@ -149,8 +149,8 @@ struct Parser {
 						const_val = find_const(match.str());
 					}
 					instruction.mod = find_mode(comp);
-					instruction.reg1 = find_reg1(comp);
-					instruction.reg2 = find_reg2(comp);
+					instruction.reg1 = find_reg1(comp, instruction.mod);
+					instruction.reg2 = find_reg2(comp, instruction.mod);
 				}
 				else if (instr->is_instr2 && instr->dir == 0) {
 					std::regex_search(rest, match, comp_regex);
@@ -164,8 +164,8 @@ struct Parser {
 						const_val = find_const(match.str());
 					}
 					instruction.mod = find_mode(comp);
-					instruction.reg1 = find_reg1(comp);
-					instruction.reg2 = find_reg2(comp);
+					instruction.reg1 = find_reg1(comp, instruction.mod);
+					instruction.reg2 = find_reg2(comp, instruction.mod);
 				}
 				else if (instr->is_instr2 && instr->dir == 1) {
 					std::regex_search(rest, match, reg_regex);
@@ -179,8 +179,8 @@ struct Parser {
 						const_val = find_const(match.str());
 					}
 					instruction.mod = find_mode(comp);
-					instruction.reg1 = find_reg1(comp);
-					instruction.reg2 = find_reg2(comp);
+					instruction.reg1 = find_reg1(comp, instruction.mod);
+					instruction.reg2 = find_reg2(comp, instruction.mod);
 
 				}
 				std::cout << "Code for instr: " << instr->line << std::endl;
@@ -260,11 +260,11 @@ struct Parser {
 
 	}
 
-	uint32_t find_reg1(std::string comp) {
+	uint32_t find_reg1(std::string comp, uint32_t mode) {
 
 	}
 
-	uint32_t find_reg2(std::string comp) {
+	uint32_t find_reg2(std::string comp, uint32_t mode) {
 
 	}
 
