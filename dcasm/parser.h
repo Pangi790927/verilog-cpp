@@ -115,11 +115,11 @@ struct Parser {
 
 			if (instr->is_instr)
 			{
-				std::cout << "Instruction" << instr->line << std::endl;
+    			if (std::regex_search(instr->line, match, instr0_re)) {
+					std::cout << "0-arg instruction" << instr->line << std::endl;
 
-				if (std::regex_search(instr->line, match, instr0_re)) {
-					std::string instr_alias = match.str(0);
-					instr_alias = trim(instr_alias);
+    				std::string instr_alias = match.str(0);
+    				instr_alias = trim(instr_alias);
 
 					std::cout << "Instr: " << instr_alias << std::endl;
 
@@ -133,7 +133,20 @@ struct Parser {
 					std::cout << "Code for instr: " << instr_code
 							<< " => " << code << std::endl;					
 					std::cout << instruction.to_string() << std::endl;
-				}
+    			}
+
+    			if (std::regex_search(instr->line, match, instr1_re)) {
+					std::cout << "1-arg instruction" << instr->line << std::endl;
+
+					std::string instr_alias = match.str(1);
+					std::string op1 = match.str(3); // first and only operand
+
+    				instr_alias = trim(instr_alias);
+    				op1 = trim(op1);
+
+    				std::cout << "Instr: " << instr_alias << "\t" << op1 << std::endl;
+
+    			}
 			}
 		}
 		std::cout << "============ TRANSLATING END ============" << std::endl;
