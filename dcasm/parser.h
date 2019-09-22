@@ -99,6 +99,56 @@ struct Parser {
 		std::vector<uint32_t> instructions;
 		std::smatch match;
 
+		for (auto& instr : asm_instr) {
+			std::cout << "------------ line: ------------" << std::endl;
+			AsmBin instruction;
+
+			if (instr->is_local) {
+				std::cout << "Label" << std::endl;
+				continue;
+			}
+
+			if (instr->is_label)
+			{
+				std::cout << "Local label" << std::endl;
+				continue;
+			}
+
+			if (instr->is_instr)
+			{
+				static std::regex instr_regex(
+						GET_STR(j_match["macro"], "__INSTRS__"));
+
+				std::regex_search(instr->line, match, instr_regex);
+				std::string instr_alias = match.str(0);
+				instr_alias = trim(instr_alias);
+
+				std::string instr_code = GET_STR(j_instr[instr_alias], "code");
+				int code = std::stoi(instr_code, nullptr, 0);
+
+				instruction.op = code;			// append instruction code
+				instruction.dir = instr->dir;	// append direction
+
+    			if (instr->is_instr0) {
+					std::cout << "0-arg instruction " << instr->line << std::endl;
+    			}
+
+    			if (instr->is_instr1) {
+					std::cout << "1-arg instruction " << instr->line << std::endl;
+    			}
+
+    			if (instr->is_instr2 && instr->dir == 0) {
+					std::cout << "2-arg [compl, reg]" << instr->line << std::endl;
+    			}
+
+    			if (instr->is_instr2 && instr->dir == 1) {
+					std::cout << "2-arg [reg, compl]" << instr->line << std::endl;
+    			}
+				std::cout << "Code for instr: " << instr_code
+						<< " => " << code << std::endl;					
+				std::cout << instruction.to_string() << std::endl;
+			}
+		}
 		std::cout << "============ TRANSLATING END ============" << std::endl;
 	}
 
