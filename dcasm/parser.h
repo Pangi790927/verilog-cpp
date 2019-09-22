@@ -250,6 +250,7 @@ struct Parser {
 					instruction.reg2 = find_reg2(comp);
 				}
 				std::cout << "Code for instr: " << instr->line << std::endl;
+
 				std::cout << instruction.to_string() << std::endl;
 			}
 		}
