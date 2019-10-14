@@ -27,21 +27,21 @@ static inline std::vector<std::string> ssplit(const std::string& str,
 
 
 // trim from start
-static inline std::string &ltrim(std::string &s) {
+static inline std::string ltrim(std::string s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(),
             std::not1(std::ptr_fun<int, int>(std::isspace))));
     return s;
 }
 
 // trim from end
-static inline std::string &rtrim(std::string &s) {
+static inline std::string rtrim(std::string s) {
     s.erase(std::find_if(s.rbegin(), s.rend(),
             std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
     return s;
 }
 
 // trim from both ends
-static inline std::string &trim(std::string &s) {
+static inline std::string trim(std::string s) {
     return ltrim(rtrim(s));
 }
 
@@ -68,6 +68,32 @@ inline uint32_t own_stol(std::string num_str) {
 			return std::stol(num_str.c_str() + 2, NULL, 2);
 	}
 	return std::stol(num_str, NULL, 0);
+}
+
+template <typename Arg>
+auto sformat_arg(Arg&& arg) {
+	return std::forward<Arg>(arg);
+}
+
+template <>
+auto sformat_arg <std::string&> (std::string& str) {
+	return str.c_str();
+}
+
+template <>
+auto sformat_arg <const std::string&> (const std::string& str) {
+	return str.c_str();
+}
+
+template <typename ...Types>
+std::string sformat(const char* fmt, Types ...args) {
+	int len = snprintf(NULL, 0, fmt, sformat_arg(args)...);
+	if (len <= 0) {
+		return "";	
+	}
+	std::vector<char> vec(len + 1);
+	snprintf(&vec[0], vec.size(), fmt, sformat_arg(args)...);
+	return &vec[0];
 }
 
 

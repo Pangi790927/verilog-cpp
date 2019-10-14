@@ -20,14 +20,19 @@
 		"__DB__": "db",
 		"__DW__": "dw",
 		"__DD__": "dd",
-		"__DATA__": "(__DB__|__DW__|__DD__)__SPACE__.*"
+		"__DATA__": "(__DB__|__DW__|__DD__)"
 	},
 	"comment": "\\;(.*)",
 	"local_label": "^__SPACES__(__LOCAL_LB__):__SPACES__\\;?",
 	"label": "^__SPACES__(__LABEL__):__SPACES__\\;?",
-	"data": "^__SPACES____DATA__$",
+	"data": "^__SPACES____DATA____SPACE__.*$",
 	"instr": "^__SPACES__(__INSTRS__)__SPACES__$",
 	"instr_op": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__COMPOSED__)__SPACES__$",
 	"instr_re_op": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__REGS__)__SPACES__\\,__SPACES__(__COMPOSED__)__SPACES__$",
-	"instr_op_re": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__COMPOSED__)__SPACES__\\,__SPACES__(__REGS__)__SPACES__$"
+	"instr_op_re": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__COMPOSED__)__SPACES__\\,__SPACES__(__REGS__)__SPACES__$",
+	"data_aling": [
+		{"name": "db", "padd": 1},
+		{"name": "dw", "padd": 2},
+		{"name": "dd", "padd": 4}
+	]
 }

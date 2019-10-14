@@ -28,6 +28,7 @@ label:
 abcedx:
 	mov [eax + ebx + abcedx], edx
 	hlt
+	cli
 label2:
 	jmp .local_label
 	.local_label:
@@ -44,16 +45,61 @@ func2:
 	test eax
 	je .back
 
+mov eax, 'a'
+
 mov eax, message
 call print_message
 
-mov eax, 'a'
+print:
 
 print_message:
 	int 0x10
 
+nop
+nop
+nop
+nop
+
 message:
 	db "this is a string", 0
+
+nop
+nop
+nop
+nop
+
+main:
+	mov eax, msg
+	call print
+
+nop
+nop
+nop
+nop
+
+msg:
+	db "this is a string", 0
+
+db "ana are mere", 0; char *p = "ana are mere"
+dw 1, 2, 3, 4		; short int *p = {1, 2, 3, 4}
+dd 1, 2, 3, 4		; int *p = {1, 2, 3, 4}
+
+Clasa:
+	.membru1:
+		db 1
+	.membru2:
+		db 2
+	.membru3:
+		dw 3
+
+; cod c:
+; #include "print.h" 
+
+; char *msg = "this is a string";
+
+; int main() {
+; 	print(msg);
+; }
 
 ; match
 ; extrct

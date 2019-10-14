@@ -44,7 +44,7 @@ struct Parser {
 	std::vector<std::shared_ptr<AsmInstr>> asm_instr;
 
 	Parser (std::string fileIn, std::string fileOut)
-	: in(fileIn.c_str()), out(fileOut.c_str())
+	: in(fileIn.c_str()), out(fileOut.c_str(), std::ios::binary)
 	{
 		std::ifstream in_regs("regs.json");
 		std::ifstream in_instr("instr.json");
@@ -69,7 +69,7 @@ struct Parser {
 			printf("[%s] = %s\n", key.c_str(), val.get<std::string>().c_str());
 		}
 		for (auto&& [key, val] : j_match.get<json::object_t>()) {
-			if (key != "macro")
+			if (val.is_string())
 				printf("[%s] = %s\n", key.c_str(),
 						val.get<std::string>().c_str());
 		}
@@ -95,13 +95,30 @@ struct Parser {
 
 	void translate() {
 		std::cout << "=========== TRANSLATING BEGIN ===========" << std::endl;
-		std::vector<uint32_t> instructions;
+		std::vector<uint32_t> memory;
+		std::vector<uint32_t> data_memory;
 		std::smatch match;
 
+		auto append_static_data = [&data_memory, &memory] {
+			int i = 0;
+			uint8_t bytes[4];
+			for (auto byte : data_memory) {
+				bytes[i] = byte;
+				i++;
+				if (i >= 4) {
+					i = 0;
+					memory.push_back(*(uint32_t *)bytes);
+				}
+			}
+			if (i != 0)
+				memory.push_back(*(uint32_t *)bytes);
+			data_memory.clear();
+		};
+
 		for (auto& instr : asm_instr) {
-			std::cout << "------------ line: ------------" << std::endl;
 			AsmBin instruction;
 
+			/* those use no memory */
 			if (instr->is_local) {
 				continue;
 			}
@@ -110,9 +127,19 @@ struct Parser {
 				continue;
 			}
 
+			/* those will use memory */
 			if (instr->is_data) {
-				std::cout << "DATA: TO DO" << std::endl;
+				auto vec = parse_data(instr.get());
+				data_memory.insert(data_memory.end(), vec.begin(), vec.end());
+				printf("line \"%s\" will be transformed in:\n\t -> ",
+						instr->line.c_str());
+				for (auto&& byte : vec)
+					printf("%#x, ", byte);
+				printf("\n\n");
 				continue;
+			}
+			else {
+				append_static_data();	
 			}
 
 			if (instr->is_instr)
@@ -204,11 +231,21 @@ struct Parser {
 				}
 				std::cout << "Instr line: " << instr->line << std::endl;
 				std::cout << instruction.to_string() << std::endl;
-				if (has_const_val)
+				memory.push_back(instruction.code);
+				if (has_const_val) {
+					memory.push_back(const_val);
 					std::cout << "const val: " << const_val << std::endl;
+				}
 			}
+			printf("\n");
 		}
 		std::cout << "============ TRANSLATING END ============" << std::endl;
+
+		append_static_data();
+		if (memory.size() != 0)
+			out.write((char *)&memory[0], memory.size() * sizeof(memory[0]));
+		else
+			throw EXCEPTION("No resulting data");
 	}
 
 	void parseLine(std::string &line, int line_cnt) {
@@ -264,10 +301,19 @@ struct Parser {
 			.parrent_label = curr_label,
 			.line = line,
 			.line_nr = line_cnt,
-			.word_cnt = !(is_local || is_label) ? 1 + has_constant : 0,
 			.addr = current_addr
 		};
-		current_addr += instr.word_cnt * 4;
+		/* because data can have unaligned labels we need to treat it
+		differently */
+		if (instr.is_data) {
+			instr.word_cnt = 0;
+			current_addr += compute_data_space(&instr);
+		}
+		else {
+			instr.word_cnt = !(is_local || is_label) ? 1 + has_constant : 0;
+			current_addr = (current_addr / 4 + !!(current_addr % 4)) * 4;
+			current_addr += instr.word_cnt * 4;
+		}
 		asm_instr.emplace_back(new AsmInstr(instr));
 		if (is_label) {
 			label_map[sm_label.str()] = asm_instr.back().get();
@@ -275,6 +321,96 @@ struct Parser {
 		if (is_local) {
 			label_map[curr_label + sm_local.str()] = asm_instr.back().get();
 		}
+	}
+
+	int compute_data_space(AsmInstr *instr) {
+		return parse_data(instr).size();
+	}
+
+	std::vector<uint8_t> parse_data_num(std::string arg, int data_align) {
+		std::vector<uint8_t> bytes;
+		uint8_t num[4];
+		switch (data_align) {
+			case 1:
+				*(uint8_t *)num = stoi(arg);
+				break;
+			case 2:
+				*(uint8_t *)num = stoi(arg);
+				break;
+			case 4:
+				*(uint8_t *)num = stoi(arg);
+				break;
+			default:
+				EXCEPTION("unknown padding %d", data_align);
+		}
+		for (int i = 0; i < data_align; i++)
+			bytes.push_back(num[i]);
+		return bytes;
+	}
+
+	std::vector<uint8_t> parse_data_chr(std::string arg, int data_align) {
+		if (arg.size() > 1)
+			return parse_data_num(std::to_string((int)arg[1]), data_align);
+		else
+			throw EXCEPTION("char constant must have the following format: '.',"
+					"whre . can be any character");
+	}
+
+	std::vector<uint8_t> parse_data_str(std::string arg, int data_align) {
+		std::vector<uint8_t> bytes;
+		for (auto chr : arg)
+			bytes.push_back(chr);
+		while (bytes.size() % data_align != 0)
+			bytes.push_back(0);
+		return bytes;
+	}
+
+	std::vector<uint8_t> parse_data(AsmInstr *instr) {
+		static std::regex str_regex(GET_STR(j_match["macro"], "__STRING__"));
+		static std::regex chr_regex(GET_STR(j_match["macro"], "__CHAR__"));
+		static std::regex num_regex(GET_STR(j_match["macro"], "__NUMBER__"));
+		static std::regex space_regex(GET_STR(j_match["macro"], "__SPACE__"));
+		static std::regex data_regex(GET_STR(j_match["macro"], "__DATA__"));
+		std::vector<uint8_t> bytes;
+
+		int data_align = 0;
+		std::smatch match;
+		if (!std::regex_search(instr->line, match, data_regex)) {
+			throw EXCEPTION("not data [line %d]: %s",
+						instr->line_nr, instr->line.c_str());
+		}
+		else {
+			for (auto&& elem : j_match["data_aling"]) {
+				if (trim(match.str()) == GET_STR(elem, "name"))
+					data_align = elem["padd"].get<int>();
+			}
+		}
+		std::string args = ltrim(match.suffix().str());
+		while (args != "") {
+			if (args.size() > 0 && args[0] == ',')
+				args = args.substr(1, std::string::npos);
+			if (std::regex_search(args, match, num_regex) && 
+					ltrim(match.prefix().str()) == "")
+			{
+				auto vec = parse_data_num(match.str(), data_align);
+				bytes.insert(bytes.end(), vec.begin(), vec.end());
+			}
+			else if (std::regex_search(args, match, chr_regex) && 
+					ltrim(match.prefix().str()) == "")
+			{
+				auto vec = parse_data_chr(match.str(), data_align);
+				bytes.insert(bytes.end(), vec.begin(), vec.end());
+			}
+			else if (std::regex_search(args, match, str_regex) && 
+					ltrim(match.prefix().str()) == "")
+			{
+				auto vec = parse_data_str(match.str(), data_align);
+				bytes.insert(bytes.end(), vec.begin(), vec.end());
+			}
+			args = match.suffix().str();
+		}
+
+		return bytes;
 	}
 
 	uint32_t find_mode(std::string composed, AsmInstr *instr) {
@@ -555,8 +691,8 @@ struct Parser {
 				}
 			}
 		}
-		for (auto&& [key, _] : j_match.get<json::object_t>()) {
-			if (key != "macro") {
+		for (auto&& [key, data] : j_match.get<json::object_t>()) {
+			if (data.is_string()) {
 				for (auto&& [macro_key, macro] : j_match["macro"].
 						get<json::object_t>())
 				{
