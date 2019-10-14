@@ -81,6 +81,7 @@ msg:
 	db "this is a string", 0
 
 db "ana are mere", 0; char *p = "ana are mere"
+db 0
 dw 1, 2, 3, 4		; short int *p = {1, 2, 3, 4}
 dd 1, 2, 3, 4		; int *p = {1, 2, 3, 4}
 

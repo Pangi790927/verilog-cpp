@@ -25,7 +25,7 @@
 	"comment": "\\;(.*)",
 	"local_label": "^__SPACES__(__LOCAL_LB__):__SPACES__\\;?",
 	"label": "^__SPACES__(__LABEL__):__SPACES__\\;?",
-	"data": "^__SPACES____DATA__(__CHAR__|__STRING__|__NUMBER__|,__SPACES__)+(__CHAR__|__STRING__|__NUMBER__)?",
+	"data": "^__SPACES____DATA__(__CHAR__|__STRING__|__NUMBER__|,__SPACES__)*(__CHAR__|__STRING__|__NUMBER__)__SPACES__?",
 	"instr": "^__SPACES__(__INSTRS__)__SPACES__$",
 	"instr_op": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__COMPOSED__)__SPACES__$",
 	"instr_re_op": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__REGS__)__SPACES__\\,__SPACES__(__COMPOSED__)__SPACES__$",
