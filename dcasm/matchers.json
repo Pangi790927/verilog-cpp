@@ -6,7 +6,7 @@
 		"__LOCAL_LB__": "(\\.(?!__REGS__[^_a-zA-Z0-9]+)([_a-zA-Z]+[_a-zA-Z0-9]*))",
 		"__NUMBER__": "(([0-9]|[a-f]|[A-F])+(h|H)|(0x([0-9]|[a-f]|[A-F])+)|([0-9]+))",
 		"__CHAR__": "(\\'.\\')",
-		"__STRING__": "(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/|(?:u8?|U|L)?'(?:\\\\(?:['\"?\\\\abfnrtv]|[0-7]{1,3}|x[0-9a-fA-F]{1,2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})|[^'\\\\\\r\\n])+')|(?:u8?|U|L)?\"(?:\\\\(?:['\"?\\\\abfnrtv]|[0-7]{1,3}|x[0-9a-fA-F]{1,2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})|[^\"\\\\\\r\\n])*\"|(?:u8?|U|L)?R\"([^ ()\\\\\\t\\x0B\\r\\n]*)\\([\\s\\S]*?\\)\\2\"",
+		"__STRING__": "(\"(\\.|[^\"\\\\])*\")",
 		"__CONSTANT__": "(__NUMBER__|__LOCAL_LB__|__LABEL__|__CHAR__)",
 		"__INSTR_SP__": "(__INSTRS____SPACE__)",
 		"__MOD0__": "__REGS__",
@@ -20,12 +20,12 @@
 		"__DB__": "db",
 		"__DW__": "dw",
 		"__DD__": "dd",
-		"__DATA__": "(__DB__|__DW__|__DD__)"
+		"__DATA__": "(__DB__|__DW__|__DD__)__SPACE__"
 	},
 	"comment": "\\;(.*)",
 	"local_label": "^__SPACES__(__LOCAL_LB__):__SPACES__\\;?",
 	"label": "^__SPACES__(__LABEL__):__SPACES__\\;?",
-	"data": "^__SPACES____DATA____SPACE__.*$",
+	"data": "^__SPACES____DATA__(__CHAR__|__STRING__|__NUMBER__|,__SPACES__)+(__CHAR__|__STRING__|__NUMBER__)?",
 	"instr": "^__SPACES__(__INSTRS__)__SPACES__$",
 	"instr_op": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__COMPOSED__)__SPACES__$",
 	"instr_re_op": "^__SPACES__(__INSTRS__)__SPACE____SPACES__(__REGS__)__SPACES__\\,__SPACES__(__COMPOSED__)__SPACES__$",
