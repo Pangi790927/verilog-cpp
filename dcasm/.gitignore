@@ -2,3 +2,4 @@ dcasm
 dcdisasm
 *.o
 *.hex
+*.s
