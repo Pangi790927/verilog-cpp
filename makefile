@@ -8,7 +8,7 @@ OBJS := ${OBJS} obj_dir/Vmobo__ALL.a
 all: clean computer
 
 computer: mobo computer.cpp
-	g++ ${CXX_FLAGS} ${INCLUDES} computer.cpp -o computer ${OBJS} ${LD_FLAGS}
+	g++-7 ${CXX_FLAGS} ${INCLUDES} computer.cpp -o computer ${OBJS} ${LD_FLAGS}
 
 mobo: mobo.v
 	verilator -cc -O3 mobo.v
