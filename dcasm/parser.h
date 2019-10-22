@@ -504,7 +504,6 @@ struct Parser {
 		if (mode == 1)
 			return 0;
 		std::regex_search(comp, match, reg_regex);
-		std::cout << "+reg1: " << match.str() << std::endl;
 		return own_stol(GET_STR(j_regs, match.str()));
 	}
 
@@ -515,13 +514,10 @@ struct Parser {
 		if (mode == 0 || mode == 1 || mode == 2 || mode == 3 || mode == 5)
 			return 0;
 
-		std::cout << "comp: " << comp << std::endl;
 		std::regex_search(comp, match, reg_regex);
 		comp = match.suffix().str();
-		std::cout << "-reg1: " << match.str() << std::endl;
 
 		std::regex_search(comp, match, reg_regex);
-		std::cout << "-reg2: " << match.str() << std::endl;
 		return own_stol(GET_STR(j_regs, match.str()));
 	}
 
