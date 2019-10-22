@@ -501,30 +501,28 @@ struct Parser {
 		static std::regex reg_regex(GET_STR(j_match["macro"], "__REGS__"));
 
 		std::smatch match;
-		if (mode == 0 || mode == 4 || mode == 5)
+		if (mode == 1)
 			return 0;
-		if (mode == 1 || mode == 6) {
-			std::regex_search(comp, match, reg_regex);
-			return own_stol(GET_STR(j_regs, match.str()));
-		}
-		return 0;
+		std::regex_search(comp, match, reg_regex);
+		std::cout << "+reg1: " << match.str() << std::endl;
+		return own_stol(GET_STR(j_regs, match.str()));
 	}
 
 	uint32_t find_reg2(std::string comp, uint32_t mode, AsmInstr *instr) {
 		static std::regex reg_regex(GET_STR(j_match["macro"], "__REGS__"));
 
 		std::smatch match;
-		if (mode == 0 || mode == 4 || mode == 5)
+		if (mode == 0 || mode == 1 || mode == 2 || mode == 3 || mode == 5)
 			return 0;
-		if (mode == 1 || mode == 6) {
-			std::regex_search(comp, match, reg_regex);
-			comp = match.suffix().str();
-		}
-		if (mode == 6) {
-			std::regex_search(comp, match, reg_regex);
-			return own_stol(GET_STR(j_regs, match.str()));
-		}
-		return 0;
+
+		std::cout << "comp: " << comp << std::endl;
+		std::regex_search(comp, match, reg_regex);
+		comp = match.suffix().str();
+		std::cout << "-reg1: " << match.str() << std::endl;
+
+		std::regex_search(comp, match, reg_regex);
+		std::cout << "-reg2: " << match.str() << std::endl;
+		return own_stol(GET_STR(j_regs, match.str()));
 	}
 
 	bool has_const(std::string comp, uint32_t mode, AsmInstr *instr) {
@@ -532,9 +530,9 @@ struct Parser {
 			case 0: return false;
 			case 1: return true;
 			case 2: return true;
-			case 3: return true;
+			case 3: return false;
 			case 4: return false;
-			case 5: return false;
+			case 5: return true;
 			case 6: return true;
 			default: throw EXCEPTION("mode not known for instr[line %d] %s",
 				instr->line_nr, instr->line.c_str());
@@ -553,9 +551,10 @@ struct Parser {
 		static std::regex const_regex(GET_STR(j_match["macro"], "__CONSTANT__"));		
 
 		std::smatch match;
-		if (mode == 0 || mode == 4 || mode == 5)
+
+		if (mode == 0 || mode == 3 || mode == 4)
 			return 0;
-		if (mode == 1 || mode == 6) {
+		if (mode == 5 || mode == 6) {
 			std::regex_search(comp, match, reg_regex);
 			comp = match.suffix().str();
 		}
@@ -571,6 +570,9 @@ struct Parser {
 		bool is_local = std::regex_match(const_str, local_regex);
 		bool is_number = std::regex_match(const_str, number_regex);
 		bool is_char = std::regex_match(const_str, char_regex);
+
+		std::cout << "const: " << const_str << std::endl;
+		std::cout << "lbl: " << is_label << " loc: " << is_local << std::endl;
 
 		if (is_label) {
 			std::string label = const_str;
