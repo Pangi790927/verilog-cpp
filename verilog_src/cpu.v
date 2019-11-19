@@ -25,15 +25,15 @@ module cpu(
 	state_t next_state	= '{0, 0, 0};
 
 	// instantiate T1 register and related connections
-	wire                        t1_oe;
-	wire                        t1_we;
+	logic                        t1_oe;
+	logic                        t1_we;
 	wire[word_width-1 : 0]      t1_in;
 	wire[word_width-1 : 0]      t1_out;
 	register #(word_width) t1(clk, rst, t1_oe, t1_we, t1_in, t1_out);
 
 	// instantiate T2 register and related connections
-	wire                        t2_oe;
-	wire                        t2_we;
+	logic                        t2_oe;
+	logic                        t2_we;
 	wire[word_width-1 : 0]      t2_in;
 	wire[word_width-1 : 0]      t2_out;
 	register #(word_width) t2(clk, rst, t2_oe, t2_we, t2_in, t2_out);
@@ -46,30 +46,30 @@ module cpu(
 	wire[4 : 0]                 alu_flags;
 	alu #(word_width, 5) alu(alu_oe, alu_opcode, t1_out, t2_out, alu_carry, alu_out, alu_flags);
 
-	wire 						addr_oe;
-	wire 						addr_we;
+	logic 						addr_oe;
+	logic 						addr_we;
 	wire [word_width-1 : 0]		addr_in;
 	register addr_reg(clk, rst, addr_oe, addr_we, addr_in, addr_out);
 	/* cpu -> we -> addr -> oe -> mobo */
 
-	wire 						mobodat_out_oe;
-	wire 						mobodat_out_we;
+	logic 						mobodat_out_oe;
+	logic 						mobodat_out_we;
 	wire [word_width-1 : 0]		mobodat_out_in;
 	register mobodata_out_reg(clk, rst, mobodat_out_oe, mobodat_out_we,
 			mobodat_out_in, mobodat_out);
 	/* cpu -> we -> mobodat_out -> oe -> mobo */
 
-	wire 						mobodat_in_oe;
-	wire 						mobodat_in_we;
+	logic 						mobodat_in_oe;
+	logic 						mobodat_in_we;
 	wire [word_width-1 : 0]		mobodat_in_out;
 	register mobodat_in_reg(clk, rst, mobodat_in_oe, mobodat_in_we,
 				mobodat_in, mobodat_in_out);
 	/* cpu <- oe <- mobodat_in <- we <- mobo */
 	
-	wire [word_width-1 : 0]		dbg_in;
+	logic [word_width-1 : 0]		dbg_in;
 	bus bus(addr_out, mobodat_in_out, t1_in, t2_in, t1_out, t2_out, dbg_in);
 
-	wire dbg_enable;
+	logic dbg_enable;
 
 	/* fcn modules */
 	cpu_fcn_rw cpu_fcn_rw(state, next_state, mobo_stat, mobo_ctrl, dbg_enable);
