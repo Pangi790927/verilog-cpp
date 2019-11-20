@@ -22,4 +22,6 @@ autoconf        # Create ./configure script
 ./configure
 make
 sudo make install
+
+sudo mv verilator /usr/share/verilator
 # Now see "man verilator" or online verilator.pdf's for the example tutorials

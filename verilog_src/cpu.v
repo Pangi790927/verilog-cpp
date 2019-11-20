@@ -13,8 +13,8 @@ module cpu(
 		input		rst,
 		output	reg	[word_width-1 : 0] mobo_ctrl,
 		input		[word_width-1 : 0] mobo_stat,
-		output		[word_width-1 : 0] addr_out,
-		output		[word_width-1 : 0] mobodat_out,
+		output	reg	[word_width-1 : 0] addr_out,
+		output	reg	[word_width-1 : 0] mobodat_out,
 		input		[word_width-1 : 0] mobodat_in
 	);
 	`include "verilog_src/cpu_stack_fcn.v"

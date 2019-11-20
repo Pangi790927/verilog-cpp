@@ -1,14 +1,14 @@
 
 module mobo_ram(
-		input	[word_width-1 : 0]	state,
+		input			[word_width-1 : 0]	state,
 		output reg		[word_width-1 : 0]	next_state,
-		input	[word_width-1 : 0]	transl_addr,
+		input			[word_width-1 : 0]	transl_addr,
 		output reg		[word_width-1 : 0]	cpu_data_in,
-		input	[word_width-1 : 0]	cpu_data_out,
-		input 	[word_width-1 : 0]	ram_stat,
+		input			[word_width-1 : 0]	cpu_data_out,
+		input 			[word_width-1 : 0]	ram_stat,
 		output reg		[word_width-1 : 0]	ram_ctrl,
 		output reg		[word_width-1 : 0]	addr,
-		input	[word_width-1 : 0]	data_in,
+		input			[word_width-1 : 0]	data_in,
 		output reg		[word_width-1 : 0]	data_out
 	);
 
