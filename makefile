@@ -1,4 +1,4 @@
-INCLUDES := -I /usr/share/verilator/include/ -I Window/ -I Misc/
+INCLUDES := -I /usr/share/verilator/include/ -I Window/ -I Misc/ -I dcasm/
 CXX_FLAGS := -std=c++17 -pthread -O3 -g
 LD_FLAGS := -lGLEW -lGLU -lGL -lX11
 

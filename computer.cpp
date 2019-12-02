@@ -8,6 +8,7 @@
 #include "gl_screen.h"
 #include "vga.h"
 #include "ram.h"
+#include "eeprom.h"
 
 /* Current simulation time */
 vluint64_t main_time = 0; 
@@ -70,6 +71,9 @@ int main(int argc, char const *argv[]) {
 	{
 		Mobo mobo;
 		RAM ram(mobo, 1 << 20);	// 1Mb ram
+
+		std::string bios_path = argc > 1 ? std::string(argv[1]) : "./dcasm/bios.bin";
+		EEPROM(ram, bios_path);
 
 		io_init.wait();
 		VGA vga(
