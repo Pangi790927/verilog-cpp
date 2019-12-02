@@ -2,7 +2,7 @@
 #define ASM_INSTR
 
 #include "str_helper.h"
-#include "debug.h"
+#include "exceptions.h"
 
 // label:
 	// .local

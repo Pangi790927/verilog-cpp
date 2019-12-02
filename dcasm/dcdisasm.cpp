@@ -3,7 +3,7 @@
 
 #include "json.h"
 #include "asm_instr.h"
-#include "debug.h"
+#include "exceptions.h"
 #include "str_helper.h"
 
 #define GET_STR(jobj, str)\

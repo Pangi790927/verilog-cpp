@@ -17,6 +17,7 @@ module cpu(
 		output	reg	[word_width-1 : 0] mobodat_out,
 		input		[word_width-1 : 0] mobodat_in
 	);
+	`include "verilog_src/cpp_instr_debug.v"
 	`include "verilog_src/cpu_stack_fcn.v"
 
 	parameter word_width = `WORD_WIDTH;
@@ -95,6 +96,7 @@ module cpu(
 			$display("t1 content: %d", t1_out);
 			$display("t2 content: %d", t2_out);
 			$display("-------------------------------------------");
+			$c32("TestClass::dummy(",state.fcn_state,");");
 		end
 	end
 

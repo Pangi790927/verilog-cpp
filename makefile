@@ -2,13 +2,16 @@ INCLUDES := -I /usr/share/verilator/include/ -I Window/ -I Misc/ -I dcasm/
 CXX_FLAGS := -std=c++17 -pthread -O3 -g
 LD_FLAGS := -lGLEW -lGLU -lGL -lX11
 
-OBJS := /usr/share/verilator/include/verilated.cpp
+OBJS := /usr/share/verilator/include/verilated.cpp TestClass.cpp 
 OBJS := ${OBJS} obj_dir/Vmobo__ALL.a
 
 all: clean computer
 
 computer: mobo computer.cpp
 	g++-7 ${CXX_FLAGS} ${INCLUDES} computer.cpp -o computer ${OBJS} ${LD_FLAGS}
+
+# debugger: TestClass.cpp
+# 	g++-7 ${CXX_FLAGS} ${INCLUDES} TestClass.cpp 
 
 mobo: mobo.v
 	verilator -cc -O3 mobo.v

@@ -8,7 +8,7 @@
 
 #include "str_helper.h"
 #include "asm_instr.h"
-#include "debug.h"
+#include "exceptions.h"
 #include "json.h"
 
 #define GET_STR(jobj, str)\

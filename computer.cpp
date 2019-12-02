@@ -9,6 +9,7 @@
 #include "vga.h"
 #include "ram.h"
 #include "eeprom.h"
+#include "TestClass.h"
 
 /* Current simulation time */
 vluint64_t main_time = 0; 
@@ -74,6 +75,7 @@ int main(int argc, char const *argv[]) {
 
 		std::string bios_path = argc > 1 ? std::string(argv[1]) : "./dcasm/bios.bin";
 		EEPROM(ram, bios_path);
+		TestClass::dummy(-1);
 
 		io_init.wait();
 		VGA vga(
