@@ -9,7 +9,7 @@
 #include "vga.h"
 #include "ram.h"
 #include "eeprom.h"
-#include "TestClass.h"
+#include "debug.h"
 
 /* Current simulation time */
 vluint64_t main_time = 0; 
@@ -70,12 +70,13 @@ int main(int argc, char const *argv[]) {
 
 	std::cout << "----- Start -----" << std::endl;
 	{
+		load();
+
 		Mobo mobo;
 		RAM ram(mobo, 1 << 20);	// 1Mb ram
 
 		std::string bios_path = argc > 1 ? std::string(argv[1]) : "./dcasm/bios.bin";
 		EEPROM(ram, bios_path);
-		TestClass::dummy(-1);
 
 		io_init.wait();
 		VGA vga(
@@ -106,6 +107,8 @@ int main(int argc, char const *argv[]) {
 				/ CLOCKS_PER_SEC) / 1000'000. << "MHz" << std::endl;
 
 		io_close.wait();
+
+		unload();
 	}
 	std::cout << "closing ..." << std::endl;
 

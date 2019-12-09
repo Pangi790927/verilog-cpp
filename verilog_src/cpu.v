@@ -96,7 +96,7 @@ module cpu(
 			$display("t1 content: %d", t1_out);
 			$display("t2 content: %d", t2_out);
 			$display("-------------------------------------------");
-			$c32("TestClass::dummy(",state.fcn_state,");");
+			$c32("std::cout << disas(",state.fcn_state,",",0,") << std::endl;");
 		end
 	end
 

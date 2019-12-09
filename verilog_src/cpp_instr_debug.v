@@ -1,5 +1,5 @@
 `ifdef verilator
 `systemc_imp_header
-	#include "../TestClass.h" 
+	#include "../dcasm/debug.h" 
 `verilog
 `endif

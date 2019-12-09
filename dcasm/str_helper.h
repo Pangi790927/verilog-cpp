@@ -52,7 +52,7 @@ static inline std::string trimComments (std::string line) {
 	return "";
 }
 
-void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+static inline void replaceAll(std::string& str, const std::string& from, const std::string& to) {
 	if(from.empty())
 		return;
 	size_t start_pos = 0;
@@ -62,7 +62,7 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
 	}
 }
 
-inline uint32_t own_stol(std::string num_str) {
+static inline uint32_t own_stol(std::string num_str) {
 	if (num_str.size() > 1) {
 		if (num_str[0] == '0' && num_str[1] == 'b')
 			return std::stol(num_str.c_str() + 2, NULL, 2);
@@ -71,7 +71,7 @@ inline uint32_t own_stol(std::string num_str) {
 }
 
 template <typename Arg>
-auto sformat_arg(Arg&& arg) {
+static auto sformat_arg(Arg&& arg) {
 	return std::forward<Arg>(arg);
 }
 
@@ -86,7 +86,7 @@ auto sformat_arg <const std::string&> (const std::string& str) {
 }
 
 template <typename ...Types>
-std::string sformat(const char* fmt, Types ...args) {
+static std::string sformat(const char* fmt, Types ...args) {
 	int len = snprintf(NULL, 0, fmt, sformat_arg(args)...);
 	if (len <= 0) {
 		return "";	
